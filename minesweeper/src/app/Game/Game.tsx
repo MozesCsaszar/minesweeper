@@ -24,6 +24,10 @@ const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, regene
     batchOpen([[row, col]]);
   }
 
+  function openCorners() {
+    batchOpen([[0, 0], [0, gameState.cols - 1], [gameState.rows - 1, 0], [gameState.rows - 1, gameState.cols - 1]]);
+  }
+
   function batchOpen(opens: [number, number][]) {
     /**
      * Open more than one field on the board.
@@ -140,7 +144,7 @@ const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, regene
 
   return (
     <div onContextMenu={(e) => e.preventDefault()} className={styles.Game}>
-      {GameInfo({ regenerate: regenerate, gameState })}
+      {GameInfo({ openCorners, regenerate, gameState })}
       <div className={styles.Rows}>
         {rows}
       </div>

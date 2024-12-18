@@ -51,8 +51,11 @@ function populateBoard(board: number[][], mines: number) {
   let mines_added = 0;
   while (mines_added < mines) {
     let [i, j] = [RandInt(rows), RandInt(cols)];
-    mines_added += board[i][j] == -1 ? 0 : 1;
-    board[i][j] = -1;
+    // don't allow mines on corners
+    if ([[0, cols - 1], [0, 0], [rows - 1, 0], [rows - 1, cols - 1]].find(v => i == v[0] && j == v[1]) == undefined) {
+      mines_added += board[i][j] == -1 ? 0 : 1;
+      board[i][j] = -1;
+    }
   }
 
   // fill in adjecency info

@@ -1,11 +1,11 @@
 -add a way generalize operations performed on cell neighboors
--chording doesn't work on borders (because of the built-in flag count)
--victory doesn't work on flagged games
 -add a way to simplify state generation and re-generation
 -???remove redundant key: value from {} (ex.: {key: key})
 -at the end of the game, make flags non-hover interactive
 -add 50/50 detector
 -add detection for forced guessing
+-add chord hold down animation
+-add other animations
 -spice up the game by adding:
     -different shapes
     -order of actions that matters (in a fight)
