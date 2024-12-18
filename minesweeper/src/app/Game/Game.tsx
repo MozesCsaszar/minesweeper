@@ -18,44 +18,65 @@ interface GameProps {
 
 const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, regenerate }) => {
   function onFieldClick(row: number, col: number) {
+    /**
+     * Open one field with [row, col] coordinates.
+     */
+    batchOpen([[row, col]]);
+  }
 
-    if (gameState.board[row][col] == -1) {
-      setLost([row, col]);
+  function batchOpen(opens: [number, number][]) {
+    /**
+     * Open more than one field on the board.
+     * opens: a list of [row, col] values
+     */
+    // check whether there is a mine between the opens
+    for (let i = 0; i < opens.length; i++) {
+      let [row, col] = opens[i];
+      if (gameState.board[row][col] == -1) {
+        setLost([row, col]);
+        return;
+      }
     }
-    else {
-      // clone hidden
-      let draft = _.cloneDeep(gameState.hidden);
-      let empties: number[][] = [];
-      let opened = 1;
+    // if no mines were found, countinue with opening the needed fields
+    // clone hidden
+    let hidden = _.cloneDeep(gameState.hidden);
+    let empties: number[][] = [];
+    let opened = 0;
 
-      draft[row][col] = false;
+    // go through each of the opens, open them and check if they were empty
+    for (let i = 0; i < opens.length; i++) {
+      let [row, col] = opens[i];
+      if (hidden[row][col]) {
+        hidden[row][col] = false;
+        opened++;
+      }
 
       // add the current field to the empties list to open each cell around if needed
       if (gameState.board[row][col] == 0) {
         empties.push([row, col])
       }
+    }
 
-      // while new empty fields have been opened, open all cells around them
-      while (empties.length > 0) {
-        let [row, col] = empties[0];
-        empties.shift();
+    // while new empty fields have been opened, open all cells around them
+    while (empties.length > 0) {
+      let [row, col] = empties[0];
+      empties.shift();
 
-        // go around all of the empty locations and find everything to be uncovered
-        for (let i = -1; i < 2; i++) {
-          for (let j = -1; j < 2; j++) {
-            // make sure that the new position is valid inside of our board
-            if (IsValidPosition(row + i, col + j, gameState.board)) {
-              // don't open flagged fields
-              if (!gameState.flagged[row + i][col + j]) {
-                // don't open the emtpy field already opened
-                if (!(i == 0 && j == 0)) {
-                  if (draft[row + i][col + j]) {
-                    draft[row + i][col + j] = false;
-                    opened++;
-                    // if a new empty field was found, add it to the list
-                    if (gameState.board[row + i][col + j] == 0) {
-                      empties.push([row + i, col + j]);
-                    }
+      // go around all of the empty locations and find everything to be uncovered
+      for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+          // make sure that the new position is valid inside of our board
+          if (IsValidPosition(row + i, col + j, gameState.board)) {
+            // don't open flagged fields
+            if (!gameState.flagged[row + i][col + j]) {
+              // don't open the emtpy field already opened
+              if (!(i == 0 && j == 0)) {
+                if (hidden[row + i][col + j] && !gameState.flagged[row + i][col + i]) {
+                  hidden[row + i][col + j] = false;
+                  opened++;
+                  // if a new empty field was found, add it to the list
+                  if (gameState.board[row + i][col + j] == 0) {
+                    empties.push([row + i, col + j]);
                   }
                 }
               }
@@ -63,9 +84,37 @@ const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, regene
           }
         }
       }
+    }
 
-      // update the hidden status of the cells
-      setHidden(draft, gameState.cells_unopened - opened);
+    // update the hidden status of the cells
+    setHidden(hidden, gameState.cells_unopened - opened);
+  }
+
+  function onFieldChord(row: number, col: number) {
+    // count the number of mines around the current field
+    let flag_count = 0;
+    let non_flagged: [number, number][] = [];
+    // collect the non-flagged tiles around the clicked tile
+    for (let i = -1; i < 2; i++) {
+      for (let j = -1; j < 2; j++) {
+        // make sure that the new position is valid inside of our board
+        if (IsValidPosition(row + i, col + j, gameState.board)) {
+          // only add tiles that aren't flagged or the one just clicked
+          if (!(i == 0 && j == 0)) {
+            if (!gameState.flagged[row + i][col + j]) {
+              non_flagged.push([row + i, col + j]);
+            }
+            else {
+              flag_count++;
+            }
+          }
+        }
+      }
+    }
+
+    // if enough tiles have been flagged, batch open the others
+    if (flag_count == gameState.board[row][col]) {
+      batchOpen(non_flagged);
     }
   }
 
@@ -85,7 +134,7 @@ const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, regene
   let rows = [];
 
   for (let i = 0; i < gameState.rows; i++) {
-    rows.push(Row({ gameState: gameState, row: i, onClick: onFieldClick, onFlag: onFieldFlagged }));
+    rows.push(Row({ gameState: gameState, row: i, onClick: onFieldClick, onFlag: onFieldFlagged, onChord: onFieldChord }));
   }
 
 

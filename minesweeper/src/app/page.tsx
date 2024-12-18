@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Game from "./Game/Game";
 import { IsValidPosition, PrettyLog, RandInt } from "./utils";
+import * as _ from 'lodash';
 
 
 function getMinesAround(row: number, col: number, board: number[][]) {
@@ -46,10 +47,14 @@ function resetBoard(board: number[][]) {
 function populateBoard(board: number[][], mines: number) {
   let rows = board.length, cols = board[0].length;
 
-  // add mines
-  for (let m = 0; m < mines; m++) {
-    board[RandInt(rows)][RandInt(cols)] = -1;
+  // add mines in a way that guarantees a certain number of mines on the board
+  let mines_added = 0;
+  while (mines_added < mines) {
+    let [i, j] = [RandInt(rows), RandInt(cols)];
+    mines_added += board[i][j] == -1 ? 0 : 1;
+    board[i][j] = -1;
   }
+
   // fill in adjecency info
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
@@ -86,7 +91,7 @@ export interface GameState {
   cells_unopened: number,
   mines_remaining: number,
   lost: boolean,
-  last_move: [number, number],
+  mistakes: { [key: number]: { [key: number]: boolean } },
   won: boolean
 }
 
@@ -103,7 +108,7 @@ function generateInitialGameState(): GameState {
     mines_remaining: init_mines,
     won: false,
     lost: false,
-    last_move: [-1, -1]
+    mistakes: {}
   }
 }
 
@@ -116,22 +121,50 @@ function generateNewGame(gameState: GameState, setGameSate: Function) {
     cells_unopened: gameState.rows * gameState.cols,
     mines_remaining: gameState.mines,
     won: false,
-    lost: false
+    lost: false,
+    mistakes: {}
   });
 }
 
+function endGameStatistics(gameState: GameState) {
+  // figure out the mistakes in flag placement
+  let mistakes: { [key: number]: { [key: number]: boolean } } = {};
+  let flagged = _.cloneDeep(gameState.flagged);
+  for (let i = 0; i < gameState.flagged.length; i++) {
+    for (let j = 0; j < gameState.flagged[i].length; j++) {
+      if (gameState.flagged[i][j] && gameState.board[i][j] != -1) {
+        if (mistakes[i] == undefined) {
+          mistakes[i] = {};
+        }
+        mistakes[i][j] = true;
+        flagged[i][j] = false;
+      }
+    }
+  }
+  return { mistakes, flagged };
+}
+
 function setLost(last_move: [number, number], gameState: GameState, setGameSate: Function) {
+  let { mistakes, flagged } = endGameStatistics(gameState);
+  // set the incorrect mine open as a mistake
+  if (mistakes[last_move[0]] == undefined) {
+    mistakes[last_move[0]] = {};
+  }
+  mistakes[last_move[0]][last_move[1]] = true;
+
   setGameSate({
     ...gameState,
     // show all cells
     hidden: createBoolean(gameState.rows, gameState.cols, false),
+    flagged: flagged,
     lost: true,
-    last_move: last_move
+    mistakes: mistakes
   });
 }
 
 function setHidden(hidden: boolean[][], cells_unopened: number, gameState: GameState, setGameSate: Function) {
   let won = cells_unopened == gameState.mines;
+  console.log("CELLS UNOPENED " + cells_unopened)
   // if victory was achieved
   if (won) {
     // create new state for flagged which flags all of the mines

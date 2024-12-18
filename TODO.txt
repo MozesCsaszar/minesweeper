@@ -1,0 +1,19 @@
+-add a way generalize operations performed on cell neighboors
+-chording doesn't work on borders (because of the built-in flag count)
+-victory doesn't work on flagged games
+-add a way to simplify state generation and re-generation
+-???remove redundant key: value from {} (ex.: {key: key})
+-at the end of the game, make flags non-hover interactive
+-add 50/50 detector
+-add detection for forced guessing
+-spice up the game by adding:
+    -different shapes
+    -order of actions that matters (in a fight)
+    -quests (to complete certain games)
+    -slay foes
+    -arena (complete certain games back-to-back)
+    -coins (to buy stuff)
+    -equipment
+    -battle 
+    -dungeons (add in new mines every x moves/seconds, spawn enemies etc.)
+    etc.
