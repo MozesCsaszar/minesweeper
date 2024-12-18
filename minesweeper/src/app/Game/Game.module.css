@@ -1,8 +1,8 @@
 .Game {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
-    width: 250;
-    height: 250;
+}
 
-    border: 1px solid rgb(80, 80, 80);
+.Game > .Rows {
+    border: 1px solid var(--border-color-dark);
 }

@@ -1,0 +1,34 @@
+.GameInfo {
+    display: flex;
+    --font-size: 25px;
+    height: calc(var(--font-size) + 10);
+    width: 100%;
+    border: 1px solid var(--border-color-dark);
+    border-bottom: none;
+}
+
+.GameInfo > * {
+    display: flex;
+    flex: 1;
+    height: 35;
+    justify-content: center;
+    align-items: center;
+}
+
+.GameInfo > .MinesRemaining {
+    font-size: var(--font-size);
+}
+
+.GameInfo > .Regenerate {
+    width: 35;
+    height: 35;
+    font-size: var(--font-size);
+    flex: 3;
+
+    background-color: var(--background-color);
+}
+
+.GameInfo > .Timer {
+    font-size: var(--font-size);
+    flex: 1;
+}

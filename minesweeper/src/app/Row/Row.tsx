@@ -3,24 +3,24 @@
 import React, { FC, MouseEventHandler } from 'react';
 import styles from './Row.module.css';
 import Field from '../Field/Field';
+import { GameState } from '../page';
 
 interface RowProps {
-  length: number,
-  i: number,
-  board: number[][],
-  onClick: Function,
-  hidden: boolean[][],
+  gameState: GameState,
+  onClick: (row: number, col: number) => void,
+  onFlag: (row: number, col: number) => void,
+  row: number,
 }
 
-const Row: FC<RowProps> = ({board, i, length, hidden, onClick}) => {
+const Row: FC<RowProps> = ({gameState, row, onFlag, onClick}) => {
   let fields = [];
 
-  for(let x = 0; x < length; x++) {
-    fields.push(Field({board: board, i: i, j: x, hidden: hidden, onClick: onClick}));
+  for(let j = 0; j < gameState.board[row].length; j++) {
+    fields.push(Field({gameState: gameState, row: row, col: j, onClick: onClick, onFlag: onFlag}));
   }
 
   return (
-    <div className={styles.Row} key={`row-${i}`}>
+    <div className={styles.Row} key={`row-${row}`}>
       {fields}
     </div>
   );
