@@ -1,11 +1,15 @@
 -add a way generalize operations performed on cell neighboors
 -add a way to simplify state generation and re-generation
 -???remove redundant key: value from {} (ex.: {key: key})
--at the end of the game, make flags non-hover interactive
+-add timekeeping
+-optimize performance of board updating
+-add update on enter when setting board settings
 -add 50/50 detector
 -add detection for forced guessing
 -add chord hold down animation
 -add other animations
+-remove corner opening on subsequent presses
+-add an ability to mark mine groups (set how many mines under same-colored flags) and smart chording based on this
 -spice up the game by adding:
     -different shapes
     -order of actions that matters (in a fight)

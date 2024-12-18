@@ -1,22 +1,30 @@
 'use client';
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import Row from '../Row/Row';
 import styles from './Game.module.css';
 import { IsValidPosition } from '../utils';
 import * as _ from 'lodash';
 import { GameState } from '../page';
 import GameInfo from '../GameInfo/GameInfo';
+import BoardControl from '../BoardControl/BoardControl';
 
 interface GameProps {
   gameState: GameState,
   setHidden: (hidden: boolean[][], cells_unopened: number) => void,
   setFlagged: (hidden: boolean[][], mines_remaining: number) => void,
   setLost: (last_move: [number, number]) => void,
+  setGameValues: () => void,
   regenerate: Function,
+  rows: number,
+  setRows: Function,
+  cols: number,
+  setCols: Function,
+  mines: number,
+  setMines: Function
 }
 
-const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, regenerate }) => {
+const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, setGameValues, regenerate, rows, cols, mines, setRows, setCols, setMines }) => {
   function onFieldClick(row: number, col: number) {
     /**
      * Open one field with [row, col] coordinates.
@@ -135,18 +143,19 @@ const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, regene
     setFlagged(draft, mines_remaining);
   }
 
-  let rows = [];
+  let rowElements = [];
 
   for (let i = 0; i < gameState.rows; i++) {
-    rows.push(Row({ gameState: gameState, row: i, onClick: onFieldClick, onFlag: onFieldFlagged, onChord: onFieldChord }));
+    rowElements.push(Row({ gameState: gameState, row: i, onClick: onFieldClick, onFlag: onFieldFlagged, onChord: onFieldChord }));
   }
 
 
   return (
     <div onContextMenu={(e) => e.preventDefault()} className={styles.Game}>
+      {BoardControl({ rows, setRows, cols, setCols, mines, setMines, setGameValues })}
       {GameInfo({ openCorners, regenerate, gameState })}
       <div className={styles.Rows}>
-        {rows}
+        {rowElements}
       </div>
     </div>
   );

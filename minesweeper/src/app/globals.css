@@ -3,25 +3,32 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --base-color: 80;
+  --spread-border-down: 40;
+  --spread-border-up: 15;
+  --border-color-dark: rgb(calc(var(--base-color) - var(--spread-border-down)), calc(var(--base-color) - var(--spread-border-down)), calc(var(--base-color) - var(--spread-border-down)));
+  --background-color: rgb(var(--base-color), var(--base-color), var(--base-color));
+  --border-color-bright: rgb(calc(var(--base-color) + var(--spread-border-up)), calc(var(--base-color) + var(--spread-border-up)), calc(var(--base-color) + var(--spread-border-up)));
+  --spread-background-dark: 20;
+  --background-color-darker: rgb(calc(var(--base-color) - var(--spread-background-dark)), calc(var(--base-color) - var(--spread-background-dark)), calc(var(--base-color) - var(--spread-background-dark)));
+  --spread-hover-color: 15;
+  --hover-color: rgb(calc(var(--base-color) - var(--spread-hover-color)), calc(var(--base-color) - var(--spread-hover-color)), calc(var(--base-color) - var(--spread-hover-color)));
+
+  --border-color-darker: grey;
+  --border-width: 4px;
+
+  --background: var(--background-color);
   --foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: var(--background-color);
   }
 }
 
 body {
-  --border-color-dark: rgb(90, 90, 90);
-  --background-color: grey;
-  --hover-color: grey;
-  --border-color-bright: rgb(218, 217, 217);
-  --border-color-darker: grey;
-  --border-width: 4px;
-
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
@@ -34,8 +41,8 @@ body {
   border-left: var(--border-width) solid var(--border-color-bright);
 }
 
-.Button:hover {
+/* .Button:not(.NoHover):hover {
   border: var(--border-width) solid var(--border-color-dark);
   border-bottom: var(--border-width) solid var(--border-color-bright);
   border-right: var(--border-width) solid var(--border-color-bright);
-}
+} */

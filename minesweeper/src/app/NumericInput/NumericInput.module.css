@@ -1,0 +1,16 @@
+.NumericInput>label>input {
+    background-color: var(--background-color-darker);
+    width: 50px;
+    margin-top: 4px;
+    text-align: center;
+    color: rgb(190, 190, 190);
+}
+
+.NumericInput>label {
+    font-weight: 700;
+}
+
+.NumericInput>label>input:focus {
+    outline: none;
+    border-bottom: 2px solid var(--border-color-darker);
+}

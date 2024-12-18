@@ -1,3 +1,5 @@
+@import url('https://fonts.cdnfonts.com/css/alarm-clock');
+
 .GameInfo {
     display: flex;
     --font-size: 25px;
@@ -7,7 +9,7 @@
     border-bottom: none;
 }
 
-.GameInfo > * {
+.GameInfo>* {
     display: flex;
     flex: 1;
     height: 35;
@@ -15,11 +17,15 @@
     align-items: center;
 }
 
-.GameInfo > .MinesRemaining {
-    font-size: var(--font-size);
+.GameInfo>.MinesRemaining {
+    font-size: 32;
+    background-color: var(--background-color);
+    color: rgb(236, 34, 27);
+    font-weight: 900;
+    font-family: 'alarm clock', sans-serif;
 }
 
-.GameInfo > .Regenerate {
+.GameInfo>.Regenerate {
     width: 35;
     height: 35;
     font-size: var(--font-size);
@@ -28,7 +34,10 @@
     background-color: var(--background-color);
 }
 
-.GameInfo > .Timer {
-    font-size: var(--font-size);
-    flex: 1;
+.GameInfo>.Timer {
+    font-size: 32;
+    background-color: var(--background-color);
+    color: rgb(236, 34, 27);
+    font-weight: 900;
+    font-family: 'alarm clock', sans-serif;
 }

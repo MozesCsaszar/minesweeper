@@ -67,8 +67,6 @@ function populateBoard(board: number[][], mines: number) {
     }
   }
 
-  PrettyLog(board);
-
   return board;
 }
 
@@ -99,7 +97,7 @@ export interface GameState {
 }
 
 function generateInitialGameState(): GameState {
-  const init_rows = 10, init_cols = 10, init_mines = 20;
+  const init_rows = 20, init_cols = 20, init_mines = 80;
   return {
     rows: init_rows,
     cols: init_cols,
@@ -161,13 +159,13 @@ function setLost(last_move: [number, number], gameState: GameState, setGameSate:
     hidden: createBoolean(gameState.rows, gameState.cols, false),
     flagged: flagged,
     lost: true,
-    mistakes: mistakes
+    mistakes: mistakes,
   });
 }
 
 function setHidden(hidden: boolean[][], cells_unopened: number, gameState: GameState, setGameSate: Function) {
   let won = cells_unopened == gameState.mines;
-  console.log("CELLS UNOPENED " + cells_unopened)
+
   // if victory was achieved
   if (won) {
     // create new state for flagged which flags all of the mines
@@ -207,8 +205,31 @@ function setFlagged(flagged: boolean[][], mines_remaining: number, gameState: Ga
   })
 }
 
+function setGameValues(rows: number, setRows: Function, cols: number, setCols: Function, mines: number, setMines: Function, gameState: GameState, setGameState: Function) {
+  function validate(value: number, min: number, max: number) {
+    return value < min ? min : (value > max ? max : value);
+  }
+
+  rows = validate(rows, 10, 100);
+  cols = validate(cols, 10, 100);
+  mines = validate(mines, Math.floor(rows * cols / 10), Math.ceil(rows * cols / 3));
+  setRows(rows); setCols(cols); setMines(mines);
+
+  // validate the row, column and mine values
+  let newGameState = {
+    ...gameState,
+    rows,
+    cols,
+    mines
+  }
+  generateNewGame(newGameState, setGameState);
+}
+
 export default function Home() {
   const [gameState, setGameSate] = useState(generateInitialGameState());
+  const [rows, setRows] = useState(gameState.rows);
+  const [cols, setCols] = useState(gameState.cols);
+  const [mines, setMines] = useState(gameState.mines);
 
   function regenerate() {
     generateNewGame(gameState, setGameSate);
@@ -216,11 +237,13 @@ export default function Home() {
 
   return (
     Game({
+      rows, setRows, cols, setCols, mines, setMines,
       gameState: gameState,
       setFlagged: (flagged: boolean[][], mines_remaining: number) => setFlagged(flagged, mines_remaining, gameState, setGameSate),
       setHidden: (hidden: boolean[][], cells_unopened: number) => setHidden(hidden, cells_unopened, gameState, setGameSate),
       setLost: (last_move: [number, number]) => setLost(last_move, gameState, setGameSate),
-      regenerate: regenerate
+      regenerate: regenerate,
+      setGameValues: () => setGameValues(rows, setRows, cols, setCols, mines, setMines, gameState, setGameSate)
     })
   );
 }
