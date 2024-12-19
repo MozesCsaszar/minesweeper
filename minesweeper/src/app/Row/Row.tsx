@@ -10,19 +10,17 @@ interface RowProps {
   flaggedSlice: boolean[],
   mistakesSlice: { [key: string]: boolean } | undefined
   gameEnded: boolean,
-  onClick: (row: number, col: number) => void,
-  onFlag: (row: number, col: number) => void,
-  onChord: (row: number, col: number) => void
   row: number,
+  dispatch: Function
 }
 
-const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlice, gameEnded, row, onFlag, onChord, onClick }) => {
+const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlice, gameEnded, row, dispatch }) => {
   let fields = [];
 
   for (let j = 0; j < boardSlice.length; j++) {
     fields.push(<Field value={boardSlice[j]} hidden={hiddenSlice[j]}
-      flagged={flaggedSlice[j]} mistake={mistakesSlice?.[j]} row={row} col={j} onChord={onChord}
-      onClick={onClick} onFlag={onFlag} gameEnded={gameEnded} key={`key-${row}-${j}`} />)
+      flagged={flaggedSlice[j]} mistake={mistakesSlice?.[j]} row={row} col={j}
+      gameEnded={gameEnded} dispatch={dispatch} key={`key-${row}-${j}`} />)
   }
 
   return (
@@ -32,4 +30,6 @@ const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlic
   );
 };
 
-export default React.memo(Row);
+const arePropsEqual = (prevProps: Readonly<RowProps>, nextProps: Readonly<RowProps>) => { return prevProps.gameEnded == nextProps.gameEnded && prevProps.flaggedSlice === nextProps.flaggedSlice && prevProps.hiddenSlice === nextProps.hiddenSlice };
+
+export default React.memo(Row, arePropsEqual);

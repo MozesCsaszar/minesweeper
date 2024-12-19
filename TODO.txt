@@ -10,6 +10,7 @@
 -add other animations
 -remove corner opening on subsequent presses
 -add an ability to mark mine groups (set how many mines under same-colored flags) and smart chording based on this
+-unify style (string-based type names, type and function names capitalization and grammar)
 -spice up the game by adding:
     -different shapes
     -order of actions that matters (in a fight)

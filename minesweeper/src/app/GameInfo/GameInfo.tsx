@@ -1,15 +1,13 @@
 import React, { FC } from 'react';
 import styles from './GameInfo.module.css';
-import { GameState } from '../page';
+import { GameState } from '../Game/Game';
 
 interface GameInfoProps {
-  regenerate: Function,
-  openCorners: Function,
+  gameStateDispatch: Function,
   gameState: GameState
-
 }
 
-const GameInfo: FC<GameInfoProps> = ({ openCorners, regenerate, gameState }) => {
+const GameInfo: FC<GameInfoProps> = ({ gameStateDispatch, gameState }) => {
   function padValue(value: number, len: number) {
     let s: string = String(value);
     let l = len - s.length;
@@ -21,7 +19,8 @@ const GameInfo: FC<GameInfoProps> = ({ openCorners, regenerate, gameState }) => 
   return (
     <div className={styles.GameInfo}>
       <div className={styles.MinesRemaining}>{padValue(gameState.mines_remaining, padLenght)}</div>
-      <button className={`${styles.Regenerate} Button`} onContextMenu={() => openCorners()} onClick={() => { regenerate() }}>{gameState.lost ? 'Defeat' : (gameState.won ? 'Victory' : '⭮')}</button>
+      <button className={`${styles.Regenerate} Button`} onContextMenu={() => gameStateDispatch({ type: 'open_corners', row: -1, col: -1 })}
+        onClick={() => gameStateDispatch({ type: 'regenerate', row: -1, col: -1 })}>{gameState.lost ? 'Defeat' : (gameState.won ? 'Victory' : '⭮')}</button>
       <div className={styles.Timer}>{padValue(0, padLenght)}</div>
     </div>
   );
