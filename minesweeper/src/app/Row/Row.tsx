@@ -1,30 +1,35 @@
 'use client';
 
-import React, { FC, MouseEventHandler } from 'react';
+import React, { FC, memo } from 'react';
 import styles from './Row.module.css';
 import Field from '../Field/Field';
-import { GameState } from '../page';
 
 interface RowProps {
-  gameState: GameState,
+  boardSlice: number[],
+  hiddenSlice: boolean[],
+  flaggedSlice: boolean[],
+  mistakesSlice: { [key: string]: boolean } | undefined
+  gameEnded: boolean,
   onClick: (row: number, col: number) => void,
   onFlag: (row: number, col: number) => void,
   onChord: (row: number, col: number) => void
   row: number,
 }
 
-const Row: FC<RowProps> = ({ gameState, row, onFlag, onChord, onClick }) => {
+const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlice, gameEnded, row, onFlag, onChord, onClick }) => {
   let fields = [];
 
-  for (let j = 0; j < gameState.board[row].length; j++) {
-    fields.push(Field({ gameState: gameState, row: row, col: j, onClick: onClick, onFlag: onFlag, onChord: onChord }));
+  for (let j = 0; j < boardSlice.length; j++) {
+    fields.push(<Field value={boardSlice[j]} hidden={hiddenSlice[j]}
+      flagged={flaggedSlice[j]} mistake={mistakesSlice?.[j]} row={row} col={j} onChord={onChord}
+      onClick={onClick} onFlag={onFlag} gameEnded={gameEnded} key={`key-${row}-${j}`} />)
   }
 
   return (
-    <div className={styles.Row} key={`row-${row}`}>
+    <div className={styles.Row}>
       {fields}
     </div>
   );
-}
+};
 
-export default Row;
+export default React.memo(Row);

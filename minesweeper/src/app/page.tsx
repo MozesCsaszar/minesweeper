@@ -97,7 +97,7 @@ export interface GameState {
 }
 
 function generateInitialGameState(): GameState {
-  const init_rows = 20, init_cols = 20, init_mines = 80;
+  const init_rows = 100, init_cols = 100, init_mines = 1000;
   return {
     rows: init_rows,
     cols: init_cols,

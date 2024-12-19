@@ -1,6 +1,6 @@
 'use client';
 
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import Row from '../Row/Row';
 import styles from './Game.module.css';
 import { IsValidPosition } from '../utils';
@@ -143,10 +143,16 @@ const Game: FC<GameProps> = ({ gameState, setHidden, setFlagged, setLost, setGam
     setFlagged(draft, mines_remaining);
   }
 
+  function gameEnded() {
+    return gameState.won || gameState.lost;
+  }
+
   let rowElements = [];
 
   for (let i = 0; i < gameState.rows; i++) {
-    rowElements.push(Row({ gameState: gameState, row: i, onClick: onFieldClick, onFlag: onFieldFlagged, onChord: onFieldChord }));
+    rowElements.push(<Row boardSlice={gameState.board[i]} hiddenSlice={gameState.hidden[i]} flaggedSlice={gameState.flagged[i]}
+      gameEnded={gameEnded()} mistakesSlice={gameState.mistakes[i]} row={i} onClick={onFieldClick}
+      onFlag={onFieldFlagged} onChord={onFieldChord} key={`row-${i}`} />)
   }
 
 
