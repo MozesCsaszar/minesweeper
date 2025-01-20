@@ -9,7 +9,7 @@ const mapState = (state: RootState) => ({
   mines: state.game.mines,
   rows: state.game.rows,
   cols: state.game.cols,
-  guesses: state.game.guesses,
+  guesses: state.game.flagGuesses,
 })
 
 const mapDispatch = {
@@ -18,6 +18,7 @@ const mapDispatch = {
 
 const connector = connect(mapState, mapDispatch);
 
+// TODO: Rename this
 interface BoardControlProps extends ConnectedProps<typeof connector> {
 }
 
@@ -28,12 +29,11 @@ const BoardControl: FC<BoardControlProps> = (props) => {
 
   return (
     // TODO: Validate the inputs
-    <div className={styles.BoardControl}>
+    <div className='flex flex-col'>
       {NumericInput({ label: 'Rows', min: 10, max: 100, value: rows, setValue: setRows })}
       {NumericInput({ label: 'Columns', min: 10, max: 100, value: cols, setValue: setCols })}
       {NumericInput({ label: 'Mines', min: 10, max: rows * cols / 3, value: mines, setValue: setMines })}
-      {/* TODO: Use guesses properly */}
-      <button className='Button' onClick={() => props.generateGame({ rows, cols, mines, guesses: 3 })}>Update</button>
+      <button className='Button' onClick={() => props.generateGame({ rows, cols, mines, flagGuesses: 3, guesses: 1 })}>Update</button>
     </div>
   );
 }

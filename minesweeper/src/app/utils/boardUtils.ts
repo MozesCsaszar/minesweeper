@@ -2,7 +2,7 @@ import { GameSlice } from '../reducers/gameSlice';
 import { IsValidPosition, RandInt } from './utils';
 import * as _ from 'lodash';
 
-function getMinesAround(row: number, col: number, board: number[][]) {
+export function getMinesAround(row: number, col: number, board: number[][]) {
     let nr_mines = 0;
     for (let i = -1; i < 2; i++) {
         for (let j = -1; j < 2; j++) {
@@ -13,6 +13,39 @@ function getMinesAround(row: number, col: number, board: number[][]) {
     }
 
     return nr_mines;
+}
+
+export function chordBoardField(row: number, col: number, mineTarget: number, state: GameSlice) {
+    // count the number of mines around the current field
+    let flagCount = 0;
+    let nonFlagged: [number, number][] = [];
+    // collect the non-flagged tiles around the clicked tile
+    for (let i = row - 1; i < row + 2; i++) {
+        for (let j = col - 1; j < col + 2; j++) {
+            // make sure that the new position is valid inside of our board
+            if (IsValidPosition(i, j, state.board)) {
+                // only add tiles that aren't flagged or the one just clicked
+                if (!(i == row && j == col)) {
+                    if (!state.flagged[i][j]) {
+                        nonFlagged.push([i, j]);
+                    }
+                    else {
+                        flagCount++;
+                    }
+                }
+            }
+        }
+    }
+
+    // if enough tiles have been flagged, batch open the others
+    if (flagCount == mineTarget) {
+        batchOpen(nonFlagged, state);
+    }
+}
+
+export function toggleBoardFlag(row: number, col: number, state: GameSlice) {
+    state.mines_remaining += state.flagged[row][col] ? 1 : -1;
+    state.flagged[row][col] = !state.flagged[row][col];
 }
 
 export function createBoard(rows: number, cols: number, mines: number): number[][] {
@@ -60,13 +93,13 @@ export function createBoolean(rows: number, cols: number, value: boolean): boole
     return hidden;
 }
 
-function endGameStatistics(gameState: GameSlice) {
+function endGameStatistics(state: GameSlice) {
     // figure out the mistakes in flag placement
     let mistakes: { [key: number]: { [key: number]: boolean } } = {};
-    let flagged = _.cloneDeep(gameState.flagged);
-    for (let i = 0; i < gameState.flagged.length; i++) {
-        for (let j = 0; j < gameState.flagged[i].length; j++) {
-            if (gameState.flagged[i][j] && gameState.board[i][j] != -1) {
+    let flagged = _.cloneDeep(state.flagged);
+    for (let i = 0; i < state.flagged.length; i++) {
+        for (let j = 0; j < state.flagged[i].length; j++) {
+            if (state.flagged[i][j] && state.board[i][j] != -1) {
                 if (mistakes[i] == undefined) {
                     mistakes[i] = {};
                 }
@@ -78,46 +111,46 @@ function endGameStatistics(gameState: GameSlice) {
     return { mistakes, flagged };
 }
 
-function setLost(last_move: [number, number], gameState: GameSlice): void {
-    let { mistakes, flagged } = endGameStatistics(gameState);
+export function setLost(last_move: [number, number], state: GameSlice): void {
+    let { mistakes, flagged } = endGameStatistics(state);
     // set the incorrect mine open as a mistake
     if (mistakes[last_move[0]] == undefined) {
         mistakes[last_move[0]] = {};
     }
     mistakes[last_move[0]][last_move[1]] = true;
 
-    gameState.hidden = createBoolean(gameState.rows, gameState.cols, false);
-    gameState.flagged = flagged;
-    gameState.lost = true;
-    gameState.mistakes = mistakes;
+    state.hidden = createBoolean(state.rows, state.cols, false);
+    state.flagged = flagged;
+    state.lost = true;
+    state.mistakes = mistakes;
 }
 
-function setHidden(hidden: boolean[][], cells_unopened: number, gameState: GameSlice): void {
-    let won = cells_unopened == gameState.mines;
+function setHidden(hidden: boolean[][], cells_unopened: number, state: GameSlice): void {
+    let won = cells_unopened == state.mines;
 
     // if victory was achieved
     if (won) {
         // create new state for flagged which flags all of the mines
-        let flagged = createBoolean(gameState.rows, gameState.cols, false);
-        for (let i = 0; i < gameState.rows; i++) {
-            for (let j = 0; j < gameState.cols; j++) {
-                flagged[i][j] = gameState.board[i][j] == -1;
+        let flagged = createBoolean(state.rows, state.cols, false);
+        for (let i = 0; i < state.rows; i++) {
+            for (let j = 0; j < state.cols; j++) {
+                flagged[i][j] = state.board[i][j] == -1;
             }
         }
-        gameState.hidden = createBoolean(gameState.rows, gameState.cols, false);
-        gameState.flagged = flagged;
-        gameState.mines_remaining = 0;
-        gameState.cells_unopened = cells_unopened;
-        gameState.won = true;
+        state.hidden = createBoolean(state.rows, state.cols, false);
+        state.flagged = flagged;
+        state.mines_remaining = 0;
+        state.cells_unopened = cells_unopened;
+        state.won = true;
     }
     // otherwise
     else {
-        gameState.hidden = hidden;
-        gameState.cells_unopened = gameState.cells_unopened;
+        state.hidden = hidden;
+        state.cells_unopened = cells_unopened;
     }
 }
 
-export function batchOpen(opens: [number, number][], gameState: GameSlice): void {
+export function batchOpen(opens: [number, number][], state: GameSlice): void {
     /**
      * Open more than one field on the board.
      * opens: a list of [row, col] values
@@ -125,8 +158,8 @@ export function batchOpen(opens: [number, number][], gameState: GameSlice): void
     // check whether there is a mine between the opens
     for (let i = 0; i < opens.length; i++) {
         let [row, col] = opens[i];
-        if (gameState.board[row][col] == -1) {
-            setLost([row, col], gameState);
+        if (state.board[row][col] == -1) {
+            setLost([row, col], state);
         }
     }
     // if no mines were found, countinue with opening the needed fields
@@ -138,7 +171,7 @@ export function batchOpen(opens: [number, number][], gameState: GameSlice): void
     // go through each of the opens, open them and check if they were empty
     for (let i = 0; i < opens.length; i++) {
         let [row, col] = opens[i];
-        if (gameState.hidden[row][col]) {
+        if (state.hidden[row][col]) {
             if (changed[row] == undefined) {
                 changed[row] = [];
             }
@@ -146,7 +179,7 @@ export function batchOpen(opens: [number, number][], gameState: GameSlice): void
             opened++;
 
             // add the current field to the empties list to open each cell around if needed
-            if (gameState.board[row][col] == 0) {
+            if (state.board[row][col] == 0) {
                 empties.push([row, col])
             }
         }
@@ -161,19 +194,19 @@ export function batchOpen(opens: [number, number][], gameState: GameSlice): void
         for (let i = -1; i < 2; i++) {
             for (let j = -1; j < 2; j++) {
                 // make sure that the new position is valid inside of our board
-                if (IsValidPosition(row + i, col + j, gameState.board)) {
+                if (IsValidPosition(row + i, col + j, state.board)) {
                     // don't open flagged fields
-                    if (!gameState.flagged[row + i][col + j]) {
+                    if (!state.flagged[row + i][col + j]) {
                         // don't open the emtpy field already opened
                         if (!(i == 0 && j == 0)) {
-                            if (gameState.hidden[row + i][col + j] && !changed[row + i]?.[col + j] && !gameState.flagged[row + i][col + i]) {
+                            if (state.hidden[row + i][col + j] && !changed[row + i]?.[col + j] && !state.flagged[row + i][col + i]) {
                                 if (changed[row + i] == undefined) {
                                     changed[row + i] = [];
                                 }
                                 changed[row + i][col + j] = true;
                                 opened++;
                                 // if a new empty field was found, add it to the list
-                                if (gameState.board[row + i][col + j] == 0) {
+                                if (state.board[row + i][col + j] == 0) {
                                     empties.push([row + i, col + j]);
                                 }
                             }
@@ -184,11 +217,11 @@ export function batchOpen(opens: [number, number][], gameState: GameSlice): void
         }
     }
 
-    let hidden: boolean[][] = [...gameState.hidden];
+    let hidden: boolean[][] = [...state.hidden];
     let newArr: boolean[] = [];
 
     for (let i in changed) {
-        newArr = _.cloneDeep(gameState.hidden[i]);
+        newArr = _.cloneDeep(state.hidden[i]);
         for (let key in changed[i]) {
             newArr[Number(key)] = false;
         }
@@ -196,5 +229,5 @@ export function batchOpen(opens: [number, number][], gameState: GameSlice): void
     }
 
     // update the hidden status of the cells
-    setHidden(hidden, gameState.cells_unopened - opened, gameState);
+    setHidden(hidden, state.cells_unopened - opened, state);
 }

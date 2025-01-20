@@ -9,23 +9,28 @@ interface RowProps {
   boardSlice: number[],
   hiddenSlice: boolean[],
   flaggedSlice: boolean[],
-  mistakesSlice: { [key: string]: boolean } | undefined
+  mistakesSlice: { [key: string]: boolean } | undefined,
+  guessedSlice: { [key: string]: number } | undefined,
   gameEnded: boolean,
   row: number,
-  flagCell: (params: PositionActionPayload) => void,
-  openCell: (params: PositionActionPayload) => void,
-  chordCell: (params: PositionActionPayload) => void,
+  flagField: (params: PositionActionPayload) => void,
+  clickField: (params: PositionActionPayload) => void,
+  chordField: (params: PositionActionPayload) => void,
+  guessField: (params: PositionActionPayload) => void,
+  chordGuessedField: (params: PositionActionPayload) => void,
 }
 
-const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlice, gameEnded, row, flagCell, chordCell, openCell }) => {
+const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlice, guessedSlice, gameEnded, row,
+  flagField, chordField, clickField, guessField, chordGuessedField }) => {
   let fields = [];
 
   if (boardSlice != undefined) {
     for (let j = 0; j < boardSlice.length; j++) {
       fields.push(<Field value={boardSlice[j]} hidden={hiddenSlice[j]}
         flagged={flaggedSlice[j]} mistake={mistakesSlice?.[j]} row={row} col={j}
-        gameEnded={gameEnded} key={`key-${row}-${j}`} flagCell={flagCell}
-        openCell={openCell} chordCell={chordCell} />)
+        gameEnded={gameEnded} key={`key-${row}-${j}`} flagField={flagField}
+        clickField={clickField} chordField={chordField} flagGuessed={guessedSlice?.[j]}
+        guessField={guessField} chordGuessedField={chordGuessedField} />)
     }
   }
 

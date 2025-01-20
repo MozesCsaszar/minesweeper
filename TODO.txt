@@ -1,24 +1,54 @@
--add a way generalize operations performed on cell neighboors
--add a way to simplify state generation and re-generation
--???remove redundant key: value from {} (ex.: {key: key})
--add timekeeping
--optimize performance of board updating
--add update on enter when setting board settings
--add 50/50 detector
--add detection for forced guessing
--add chord hold down animation
--add other animations
--remove corner opening on subsequent presses
--add an ability to mark mine groups (set how many mines under same-colored flags) and smart chording based on this
--unify style (string-based type names, type and function names capitalization and grammar)
--spice up the game by adding:
-    -different shapes
-    -order of actions that matters (in a fight)
-    -quests (to complete certain games)
-    -slay foes
-    -arena (complete certain games back-to-back)
-    -coins (to buy stuff)
-    -equipment
-    -battle 
-    -dungeons (add in new mines every x moves/seconds, spawn enemies etc.)
-    etc.
+Functionalities:
+    -add timekeeping
+    -add tooltips to eveything
+    -add a way to measure difficulty/mine distribution when setting board settings
+    -add a way to estimate 50/50 guesses and number of items needed to be used
+    
+    -spice up the game by adding:
+        -different shapes for boards
+        -different mine shapes
+        -multi-layered maps
+        -order of actions that matters (in a fight)
+        -quests (to complete certain games)
+        -arena (complete certain games back-to-back)
+        -coins (to buy stuff)
+        -equipment (to give you abilities)
+        -battles
+        -dungeons (add in new mines every x moves/seconds, spawn enemies etc.)
+        etc.
+
+    -add an ability to mark mine groups (set how many mines under same-colored flags) and smart chording based on this
+
+
+Functional UX:
+    -update game on enter when setting board settings
+    -add tooltips to eveything
+    -add an ability to mark mine groups (set how many mines under same-colored flags) and smart chording based on this
+
+
+
+Design-based UX:
+    -style the website to be more friendly on the eyes
+    -change mine count colors to be more distinctive and visible
+    -make the color scheme more drab
+    -add chord hold down animation
+    -add other animations
+    -unify style (string-based type names, type and function names capitalization and grammar)
+
+
+Performance optimizations:
+    -optimize performance of board updating
+
+
+Code optimizations:
+    -middleware to disallow unwanted function calls (after game ended)
+    -add a way generalize operations performed on cell neighboors
+    -add a way to simplify state generation and re-generation
+    -???remove redundant key: value from {} (ex.: {key: key})
+    -remove corner opening on subsequent presses
+
+
+Beginner mode:
+    -add 50/50 detector
+    -add detection for forced guessing
+    -highlight chordable cells

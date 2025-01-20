@@ -12,7 +12,7 @@ const mapState = (state: RootState) => ({
   mines: state.game.mines,
   rows: state.game.rows,
   cols: state.game.cols,
-  guesses: state.game.guesses,
+  guesses: state.game.flagGuesses,
 })
 
 const mapDispatch = {
@@ -40,7 +40,7 @@ const GameInfo: FC<GameInfoProps> = (props) => {
       <div className={styles.MinesRemaining}>{padValue(props.mines_remaining, padLenght)}</div>
       <button className={`${styles.Regenerate} Button`}
         onContextMenu={() => props.openCorners({})}
-        onClick={() => props.generateGame({ rows: props.rows, cols: props.cols, mines: props.mines, guesses: props.guesses })}>
+        onClick={() => props.generateGame({ rows: props.rows, cols: props.cols, mines: props.mines, flagGuesses: 3, guesses: 1 })}>
         {props.lost ? 'Defeat' : (props.won ? 'Victory' : '⭮')}
       </button>
       <div className={styles.Timer}>{padValue(0, padLenght)}</div>

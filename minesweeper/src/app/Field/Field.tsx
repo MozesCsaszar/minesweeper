@@ -10,17 +10,19 @@ interface FieldProps {
   hidden: boolean,
   gameEnded: boolean,
   mistake: boolean | undefined,
+  flagGuessed: number | undefined,
   row: number,
   col: number,
-  flagCell: (params: PositionActionPayload) => void,
-  openCell: (params: PositionActionPayload) => void,
-  chordCell: (params: PositionActionPayload) => void,
+  flagField: (params: PositionActionPayload) => void,
+  guessField: (params: PositionActionPayload) => void,
+  clickField: (params: PositionActionPayload) => void,
+  chordField: (params: PositionActionPayload) => void,
+  chordGuessedField: (params: PositionActionPayload) => void,
 }
 
-// TODO: pass callbacks down
-
-const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, mistake, value, row, col, flagCell, openCell, chordCell }) => {
-  let style_names: { readonly [key: string]: string } = { '🟌': 'Mine', ' ': 'Empty', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight' };
+const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, mistake, value, row, col,
+  flagField, clickField, chordField, guessField, chordGuessedField, flagGuessed }) => {
+  let style_names: { readonly [key: string]: string } = { '🟌': 'Mine', ' ': 'Empty', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine' };
 
   function valueToString(value: number) {
     return value == -1 ? '🟌' : (value == 0 ? ' ' : String(value));
@@ -28,21 +30,38 @@ const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, mistake, value, row
 
   const valueString = useMemo(() => valueToString(value), [value]);
 
+  // TODO: Figure out if this should be +1 or not
+  const guessedVal = flagGuessed == undefined ? undefined : flagGuessed;
+
   return (
     <div className={styles.Field}>
-      <div className={`${styles.Flag} NoHover Button`} onContextMenu={() => (!gameEnded) ? flagCell({ row, col }) : null} hidden={!flagged}>
-        {<div></div>}
+      {/* Flag  */}
+      <div className={`${styles.Flag} NoHover Button`} hidden={!flagged}
+        onClick={() => (!gameEnded && flagGuessed == undefined) ? guessField({ row, col }) : null}
+        onContextMenu={() => !gameEnded && flagGuessed == undefined ? flagField({ row, col }) : null}>
+        {/* Display the flagGuessed number if applicable */}
+        {guessedVal != undefined ?
+          <>
+            {/* Foreground text */}
+            <div onClick={() => { !gameEnded ? chordGuessedField({ row, col }) : null }} className={`${styles.Symbol} ${styles.SmallSymbol} ${styles[style_names[valueToString(guessedVal)]]}`}>
+              {guessedVal}
+            </div>
+          </>
+          : null}
       </div>
-      <button className={`${styles.Top} Button`} onClick={() => openCell({ row, col })} onContextMenu={() => flagCell({ row, col })} hidden={!hidden}>
+      {/* Top part */}
+      <button className={`${styles.Top} Button`} onClick={() => clickField({ row, col })} onContextMenu={() => flagField({ row, col })} hidden={!hidden}>
 
+        {/* Value part */}
       </button>
-      <div className={`${styles.Symbol} ${styles[style_names[valueString]]}`} suppressHydrationWarning onClick={() => chordCell({ row, col })}>
+      <div className={`${styles.Symbol} ${styles[style_names[valueString]]}`} suppressHydrationWarning onClick={() => chordField({ row, col })}>
         {hidden ? '' : valueToString(value)}
       </div>
-      <div className={`${styles.Background}${(mistake ? ' ' + styles.Mistake : '')}`}>
+      {/* Background */}
+      <div className={`${styles.Background} ${(mistake ? ' ' + styles.Mistake : '')}`}>
 
       </div>
-    </div>
+    </div >
   );
 };
 

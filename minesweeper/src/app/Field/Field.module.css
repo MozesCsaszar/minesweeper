@@ -19,42 +19,54 @@
     cursor: pointer;
 }
 
-.Field>.Flag {
+.Flag {
+    z-index: 3;
+    background-color: rgb(134, 0, 0);
+}
+
+.Top {
     z-index: 2;
     background-color: var(--background-color);
 }
 
-.Field>.Flag>.FlagChar {
-    font-size: 24px;
-    height: 24px;
-    transform: translate(0px, -7px);
-    z-index: 2;
-    color: rgb(255, 70, 70);
-    text-align: center;
-}
-
-.Field>.Top {
-    z-index: 1;
-    background-color: var(--background-color);
-}
-
-.Field>.Symbol {
+.Symbol {
     font-size: 24px;
     display: flex;
-    z-index: 0;
+    z-index: 1;
     font-weight: 900;
     justify-content: center;
     align-items: center;
 }
 
-.Field>.Background {
-    z-index: -1;
-    border: 1px solid rgb(39, 38, 38);
-    background-color: var(--background-color-darker);
+.SmallSymbol {
+    width: fit-content;
+    height: inherit;
+    margin: auto;
+    margin-top: -0.7px;
+    /* background-color: var(--background-color); */
+    -webkit-text-stroke: 1px var(--background-color-darker);
+
+    /* border-top: 2px solid rgb(255, 70, 70);
+    border-bottom: 1px solid rgb(255, 70, 70); */
 }
 
-.Field>.Mistake {
+.Background {
+    font-size: 28px;
+    display: flex;
+    z-index: 0;
+    font-weight: 700;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--background-color-darker)
+}
+
+.Mistake {
     background-color: rgb(175, 60, 60);
+}
+
+.Empty {
+    color: rgb(164, 223, 255);
 }
 
 .One {
@@ -89,7 +101,11 @@
     color: rgb(188, 188, 188);
 }
 
-.Field>.Mine {
+.Nine {
+    color: black;
+}
+
+.Mine {
     font-size: 26;
     font-weight: 500;
     color: rgb(11, 11, 11);

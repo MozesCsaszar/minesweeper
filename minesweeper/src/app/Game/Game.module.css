@@ -1,9 +1,7 @@
 .Game {
-    display: inline-flex;
-    flex-direction: column;
     user-select: none;
 }
 
-.Game>.Rows {
+.Game>div>.Rows {
     border: 1px solid var(--border-color-dark);
 }
