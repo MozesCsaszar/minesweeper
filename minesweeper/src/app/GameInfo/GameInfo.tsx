@@ -1,13 +1,32 @@
 import React, { FC } from 'react';
 import styles from './GameInfo.module.css';
-import { GameState } from '../Game/Game';
+import { GameParams, generateGame, openCorners } from '../reducers/gameSlice';
+import { RootState } from '../store';
+import { connect, ConnectedProps } from 'react-redux';
 
-interface GameInfoProps {
-  gameStateDispatch: Function,
-  gameState: GameState
+
+const mapState = (state: RootState) => ({
+  mines_remaining: state.game.mines_remaining,
+  lost: state.game.lost,
+  won: state.game.won,
+  mines: state.game.mines,
+  rows: state.game.rows,
+  cols: state.game.cols,
+  guesses: state.game.guesses,
+})
+
+const mapDispatch = {
+  generateGame, openCorners
 }
 
-const GameInfo: FC<GameInfoProps> = ({ gameStateDispatch, gameState }) => {
+const connector = connect(mapState, mapDispatch);
+
+
+interface GameInfoProps extends ConnectedProps<typeof connector> {
+
+}
+
+const GameInfo: FC<GameInfoProps> = (props) => {
   function padValue(value: number, len: number) {
     let s: string = String(value);
     let l = len - s.length;
@@ -18,12 +37,15 @@ const GameInfo: FC<GameInfoProps> = ({ gameStateDispatch, gameState }) => {
 
   return (
     <div className={styles.GameInfo}>
-      <div className={styles.MinesRemaining}>{padValue(gameState.mines_remaining, padLenght)}</div>
-      <button className={`${styles.Regenerate} Button`} onContextMenu={() => gameStateDispatch({ type: 'open_corners', row: -1, col: -1 })}
-        onClick={() => gameStateDispatch({ type: 'regenerate', row: -1, col: -1 })}>{gameState.lost ? 'Defeat' : (gameState.won ? 'Victory' : '⭮')}</button>
+      <div className={styles.MinesRemaining}>{padValue(props.mines_remaining, padLenght)}</div>
+      <button className={`${styles.Regenerate} Button`}
+        onContextMenu={() => props.openCorners({})}
+        onClick={() => props.generateGame({ rows: props.rows, cols: props.cols, mines: props.mines, guesses: props.guesses })}>
+        {props.lost ? 'Defeat' : (props.won ? 'Victory' : '⭮')}
+      </button>
       <div className={styles.Timer}>{padValue(0, padLenght)}</div>
     </div>
   );
 }
 
-export default GameInfo;
+export default connector(GameInfo);

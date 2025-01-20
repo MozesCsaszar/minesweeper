@@ -3,6 +3,7 @@
 import React, { FC, memo } from 'react';
 import styles from './Row.module.css';
 import Field from '../Field/Field';
+import { PositionActionPayload } from '../reducers/gameSlice';
 
 interface RowProps {
   boardSlice: number[],
@@ -11,16 +12,21 @@ interface RowProps {
   mistakesSlice: { [key: string]: boolean } | undefined
   gameEnded: boolean,
   row: number,
-  dispatch: Function
+  flagCell: (params: PositionActionPayload) => void,
+  openCell: (params: PositionActionPayload) => void,
+  chordCell: (params: PositionActionPayload) => void,
 }
 
-const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlice, gameEnded, row, dispatch }) => {
+const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlice, gameEnded, row, flagCell, chordCell, openCell }) => {
   let fields = [];
 
-  for (let j = 0; j < boardSlice.length; j++) {
-    fields.push(<Field value={boardSlice[j]} hidden={hiddenSlice[j]}
-      flagged={flaggedSlice[j]} mistake={mistakesSlice?.[j]} row={row} col={j}
-      gameEnded={gameEnded} dispatch={dispatch} key={`key-${row}-${j}`} />)
+  if (boardSlice != undefined) {
+    for (let j = 0; j < boardSlice.length; j++) {
+      fields.push(<Field value={boardSlice[j]} hidden={hiddenSlice[j]}
+        flagged={flaggedSlice[j]} mistake={mistakesSlice?.[j]} row={row} col={j}
+        gameEnded={gameEnded} key={`key-${row}-${j}`} flagCell={flagCell}
+        openCell={openCell} chordCell={chordCell} />)
+    }
   }
 
   return (
@@ -32,4 +38,4 @@ const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlic
 
 const arePropsEqual = (prevProps: Readonly<RowProps>, nextProps: Readonly<RowProps>) => { return prevProps.gameEnded == nextProps.gameEnded && prevProps.flaggedSlice === nextProps.flaggedSlice && prevProps.hiddenSlice === nextProps.hiddenSlice };
 
-export default React.memo(Row, arePropsEqual);
+export default memo(Row);
