@@ -2,6 +2,20 @@ import { GameSlice } from '../reducers/gameSlice';
 import { IsValidPosition, RandInt } from './utils';
 import * as _ from 'lodash';
 
+export function getMineDensity(rows: number, cols: number, mines: number) {
+    const area = (rows * cols);
+    return mines / area;
+}
+
+function getDensityMultiplier(rows: number, cols: number, mines: number) {
+    const density = getMineDensity(rows, cols, mines);
+    return 1 + (density - 0.1) / (0.33 - 0.1) * 12;
+}
+
+export function getBoardDifficulty(rows: number, cols: number, mines: number) {
+    return Math.floor(getDensityMultiplier(rows, cols, mines) * (rows * cols) / 13);
+}
+
 export function getMinesAround(row: number, col: number, board: number[][]) {
     let nr_mines = 0;
     for (let i = -1; i < 2; i++) {

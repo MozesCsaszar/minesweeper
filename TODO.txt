@@ -1,8 +1,8 @@
 Functionalities:
     -add timekeeping
     -add tooltips to eveything
-    -add a way to measure difficulty/mine distribution when setting board settings
     -add a way to estimate 50/50 guesses and number of items needed to be used
+    -better difficulty calculation
     
     -spice up the game by adding:
         -different shapes for boards
