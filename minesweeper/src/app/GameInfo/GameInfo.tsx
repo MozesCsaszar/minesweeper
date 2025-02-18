@@ -13,7 +13,8 @@ const mapState = (state: RootState) => ({
   mines: state.game.mines,
   rows: state.game.rows,
   cols: state.game.cols,
-  guesses: state.game.flagGuesses,
+  guesses: state.game.guesses,
+  flagGuesses: state.game.flagGuesses,
   movesMade: state.game.movesMade
 })
 
@@ -70,7 +71,7 @@ const GameInfo: FC<GameInfoProps> = (props) => {
       {createTooltip('This button can be used to regenerate the game. To open all 4 corners on the board, right-click it. It also displays the current state of the game. If the button shows the text "Defeat", the game is lost. If the text is "Victory", then it is won. Otherwise, the game is still in progress.',
         <button className={`${styles.Regenerate} Button`}
           onContextMenu={() => props.openCorners({})}
-          onClick={() => props.generateGame({ rows: props.rows, cols: props.cols, mines: props.mines, flagGuesses: 3, guesses: 1 })}>
+          onClick={() => props.generateGame({ rows: props.rows, cols: props.cols, mines: props.mines, flagGuesses: props.flagGuesses, guesses: props.guesses })}>
           {props.lost ? 'Defeat' : (props.won ? 'Victory' : '⭮')}
         </button>,
         'bottom'

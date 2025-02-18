@@ -23,7 +23,9 @@ export interface GameSlice extends GameParams, GameTools {
     mines_remaining: number,
     won: boolean,
     lost: boolean,
-    movesMade: number
+    movesMade: number,
+    currentFlagGuesses: number,
+    currentGuesses: number,
 }
 
 export interface PositionActionPayload {
@@ -36,7 +38,9 @@ const initialState: GameSlice = {
     cols: 10,
     mines: 15,
     flagGuesses: 0,
+    currentFlagGuesses: 0,
     guesses: 3,
+    currentGuesses: 3,
     cells_unopened: 0,
     mines_remaining: 0,
     won: false,
@@ -65,8 +69,8 @@ export const gameSlice = createSlice({
             const { row, col } = action.payload;
 
             // if you are in guaranteed guessing mode
-            if (state.guessing && state.guesses > 0) {
-                state.guesses -= 1;
+            if (state.guessing && state.currentGuesses > 0) {
+                state.currentGuesses -= 1;
                 // set guessing to false to not waste guesses accidentally
                 state.guessing = false;
 
@@ -90,7 +94,7 @@ export const gameSlice = createSlice({
             const guessed = state.flagGuessed[row]?.[col];
 
             // if guessing mode and have guesses remaining
-            if (state.flagGuesses > 0) {
+            if (state.currentFlagGuesses > 0) {
                 // if guessing on a wrongly flagged field, set lost
                 if (state.board[row][col] != -1) {
                     setLost([row, col], state);
@@ -103,7 +107,7 @@ export const gameSlice = createSlice({
                             state.flagGuessed[row] = {};
                         }
                         state.flagGuessed[row][col] = getMinesAround(row, col, state.board);
-                        state.flagGuesses -= 1;
+                        state.currentFlagGuesses -= 1;
                     }
                 }
             }
@@ -134,7 +138,9 @@ export const gameSlice = createSlice({
             state.cols = cols;
             state.mines = mines;
             state.flagGuesses = flagGuesses;
+            state.currentFlagGuesses = flagGuesses;
             state.guesses = guesses;
+            state.currentGuesses = guesses;
             // set flagged, guesses and others
             state.mistakes = {};
             state.flagGuessed = {};

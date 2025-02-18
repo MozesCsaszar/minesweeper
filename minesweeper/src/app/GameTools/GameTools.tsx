@@ -9,8 +9,8 @@ import { createInfoTooltip } from '../utils/componentGenerators';
 
 const mapState = (state: RootState) => ({
   guessing: state.game.guessing,
-  guesses: state.game.guesses,
-  flagGuesses: state.game.flagGuesses
+  currentGuesses: state.game.currentGuesses,
+  currentFlagGuesses: state.game.currentFlagGuesses
 })
 
 const mapDispatch = {
@@ -35,8 +35,10 @@ const GameTools: FC<GameToolsProps> = (props) => {
 
   return (
     <div className='flex flex-col'>
-      {createInfoTooltip('To use a guess, please select the checkbox. This will guarantee that a cell opening will not result in a loss. For more details, see tooltip at game options.', generateToolUI(props.guesses, 'Guesses', () => props.setGuessing(!props.guessing), props.guessing))}
-      {createInfoTooltip('The number of flag guesses remaining. When clicking on a flag, this provide more information if it has any uses. If the tile was not a mine, the game is lost. For more details, see tooltip at game options.', <NumericInput value={props.flagGuesses} disabled label={'Flag Guesses'} />)}
+      {createInfoTooltip('To use a guess, please select the checkbox. This will guarantee that a cell opening will not result in a loss. For more details, see tooltip at game options.',
+        generateToolUI(props.currentGuesses, 'Guesses', () => props.setGuessing(!props.guessing), props.guessing))}
+      {createInfoTooltip('The number of flag guesses remaining. When clicking on a flag, this provide more information if it has any uses. If the tile was not a mine, the game is lost. For more details, see tooltip at game options.',
+        <NumericInput value={props.currentFlagGuesses} disabled label={'Flag Guesses'} />)}
     </div>
   );
 }
