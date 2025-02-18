@@ -53,12 +53,12 @@ const Game: FC<GameProps> = (props) => {
   return (
     <div onContextMenu={(e) => e.preventDefault()} className={`${styles.Game} flex flex-row gap-1`}>
       {/* Controls and Tools */}
-      <div className='flex flex-col basis-[200px] ml-1'>
-        {<BoardControl />}
+      <div className='flex flex-col basis-[200px] ml-1 fixed z-10 bg-slate-500'>
         {<GameTools />}
+        {<BoardControl />}
       </div>
       {/* Board */}
-      <div className='flex flex-col'>
+      <div className='flex flex-col relative left-[200px]'>
         {<GameInfo />}
         <div className={styles.Rows}>
           {rowElements}

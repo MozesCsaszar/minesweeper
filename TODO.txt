@@ -1,6 +1,16 @@
+Style:
+    -unify style using MUI's styling type
+    -make sure errors for inputs don't overflow, but wrap around
+    -make sure tools don't overlap the board in resting state
+    -change colors for better visibility on inputs
+    -make info icons align to the right of the boundary
+    -add animations to cell being held down/flagged
+    -add animations to cell's neightbors when being held down
+    -add board borders that actually look good
+    -align "Game Options" text with "HIDE" button
+    -add tooltip to "Guesses" checkbox
+
 Functionalities:
-    -add timekeeping
-    -add tooltips to eveything
     -add a way to estimate 50/50 guesses and number of items needed to be used
     -better difficulty calculation
     
@@ -21,8 +31,7 @@ Functionalities:
 
 
 Functional UX:
-    -update game on enter when setting board settings
-    -add tooltips to eveything
+    -update game on ENTER when setting board settings
     -add an ability to mark mine groups (set how many mines under same-colored flags) and smart chording based on this
 
 

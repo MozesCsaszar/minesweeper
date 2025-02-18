@@ -23,6 +23,7 @@ export interface GameSlice extends GameParams, GameTools {
     mines_remaining: number,
     won: boolean,
     lost: boolean,
+    movesMade: number
 }
 
 export interface PositionActionPayload {
@@ -34,8 +35,8 @@ const initialState: GameSlice = {
     rows: 10,
     cols: 10,
     mines: 15,
-    flagGuesses: 3,
-    guesses: 1,
+    flagGuesses: 0,
+    guesses: 3,
     cells_unopened: 0,
     mines_remaining: 0,
     won: false,
@@ -45,7 +46,8 @@ const initialState: GameSlice = {
     hidden: [],
     flagGuessed: {},
     mistakes: {},
-    guessing: false
+    guessing: false,
+    movesMade: 0
 }
 
 // TODO: Set up a middleware to stop unwanted actions from going through at the end of the game
@@ -65,6 +67,9 @@ export const gameSlice = createSlice({
             // if you are in guaranteed guessing mode
             if (state.guessing && state.guesses > 0) {
                 state.guesses -= 1;
+                // set guessing to false to not waste guesses accidentally
+                state.guessing = false;
+
                 // if mine, flag the field
                 if (state.board[row][col] == -1) {
                     // update flagged information
@@ -73,9 +78,6 @@ export const gameSlice = createSlice({
                 // else open the field
                 else {
                     batchOpen([[row, col]], state);
-                }
-                if (state.guesses == 0) {
-                    state.guessing = false;
                 }
             }
             else {
@@ -105,6 +107,8 @@ export const gameSlice = createSlice({
                     }
                 }
             }
+
+            state.movesMade++;
         },
         chordGuessedField: (state, action: PayloadAction<PositionActionPayload>) => {
             const { row, col } = action.payload;
@@ -113,6 +117,9 @@ export const gameSlice = createSlice({
 
             if (guessed != undefined) {
                 chordBoardField(row, col, guessed, state);
+            }
+            else {
+                state.movesMade++;
             }
         },
         chordField: (state, action: PayloadAction<PositionActionPayload>) => {
@@ -138,6 +145,7 @@ export const gameSlice = createSlice({
             // set win state
             state.won = false;
             state.lost = false;
+            state.movesMade = 0;
             state.cells_unopened = rows * cols;
             state.mines_remaining = mines;
             // create the new board

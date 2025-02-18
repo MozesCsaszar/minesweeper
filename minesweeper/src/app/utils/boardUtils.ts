@@ -55,11 +55,16 @@ export function chordBoardField(row: number, col: number, mineTarget: number, st
     if (flagCount == mineTarget) {
         batchOpen(nonFlagged, state);
     }
+    else {
+        state.movesMade++;
+    }
 }
 
 export function toggleBoardFlag(row: number, col: number, state: GameSlice) {
     state.mines_remaining += state.flagged[row][col] ? 1 : -1;
     state.flagged[row][col] = !state.flagged[row][col];
+
+    state.movesMade++;
 }
 
 export function createBoard(rows: number, cols: number, mines: number): number[][] {
@@ -163,17 +168,19 @@ function setHidden(hidden: boolean[][], cells_unopened: number, state: GameSlice
         state.cells_unopened = cells_unopened;
     }
 }
-
+/**
+ * Open more than one field on the board.
+ * opens: a list of [row, col] values
+ */
 export function batchOpen(opens: [number, number][], state: GameSlice): void {
-    /**
-     * Open more than one field on the board.
-     * opens: a list of [row, col] values
-     */
+    state.movesMade++;
+
     // check whether there is a mine between the opens
     for (let i = 0; i < opens.length; i++) {
         let [row, col] = opens[i];
         if (state.board[row][col] == -1) {
             setLost([row, col], state);
+            return;
         }
     }
     // if no mines were found, countinue with opening the needed fields
