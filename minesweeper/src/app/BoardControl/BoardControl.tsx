@@ -5,7 +5,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { getMineDensity } from '../utils/boardUtils';
 import { createInfoTooltip, createSelect, createTooltip, createValidatedTextField, InputMetadata, isFormValid } from '../utils/componentGenerators';
 import { ValidateMaxValue, ValidateMinValue } from '../utils/validators';
-import { Button, Collapse, IconButton } from '@mui/material';
+import { Button, Collapse } from '@mui/material';
 
 const mapState = (state: RootState) => ({
   mines: state.game.mines,
@@ -64,7 +64,7 @@ const Difficulties: { [key: string]: (DifficultyValues | undefined) } = {
   grandmaster: {
     rows: 50,
     cols: 50,
-    mines: 833,
+    mines: 750,
     guesses: 15,
     mineGuesses: 25
   },

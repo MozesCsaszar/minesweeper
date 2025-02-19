@@ -8,7 +8,7 @@ import GameInfo from '../GameInfo/GameInfo';
 import BoardControl from '../BoardControl/BoardControl';
 import { connect, ConnectedProps } from 'react-redux';
 import { RootState } from '../store';
-import { chordField, flagField, generateGame, clickField, guessField, chordGuessedField } from '../reducers/gameSlice';
+import { chordField, flagField, generateGame, clickField, guessField, chordGuessedField, setChording, setOpening, resetOpeningChording, regenerateGame } from '../reducers/gameSlice';
 import GameTools from '../GameTools/GameTools';
 
 const mapState = (state: RootState) => ({
@@ -18,7 +18,8 @@ const mapState = (state: RootState) => ({
 const mapDispatch = {
   flagField, clickField, chordField,
   generateGame, guessField,
-  chordGuessedField
+  chordGuessedField, setOpening, setChording,
+  resetOpeningChording, regenerateGame
 }
 
 const connector = connect(mapState, mapDispatch);
@@ -43,15 +44,18 @@ const Game: FC<GameProps> = (props) => {
   for (let i = 0; i < props.game.rows; i++) {
     rowElements.push(<Row key={`row-${i}`}
       guessedSlice={props.game.flagGuessed[i]} guessField={props.guessField} boardSlice={props.game.board[i]}
+      chording={props.game.chording} opening={props.game.opening}
       hiddenSlice={props.game.hidden[i]} flaggedSlice={props.game.flagged[i]} gameEnded={gameEnded()}
       mistakesSlice={props.game.mistakes[i]} row={i} chordGuessedField={props.chordGuessedField}
       clickField={props.clickField} flagField={props.flagField} chordField={props.chordField}
+      setOpening={props.setOpening} setChording={props.setChording}
     />)
   }
 
   // TODO: Style this a bit better
   return (
-    <div onContextMenu={(e) => e.preventDefault()} className={`${styles.Game} flex flex-row`}>
+    <div className={`${styles.Game} flex flex-row h-[100%]`} onContextMenu={(e) => e.preventDefault()}
+      onMouseUp={() => props.resetOpeningChording(undefined)} onAuxClick={(event) => event.button === 1 ? props.regenerateGame(undefined) : null}>
       {/* Controls and Tools */}
       <div className='Panel GameOptions flex flex-col basis-[200px] fixed z-10 p-1'>
         {<GameTools />}
@@ -64,7 +68,6 @@ const Game: FC<GameProps> = (props) => {
           {rowElements}
         </div>
       </div>
-
     </div>
   );
 

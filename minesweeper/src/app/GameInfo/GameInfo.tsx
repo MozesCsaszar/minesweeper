@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import styles from './GameInfo.module.css';
-import { GameParams, generateGame, openCorners } from '../reducers/gameSlice';
+import { openCorners, regenerateGame } from '../reducers/gameSlice';
 import { RootState } from '../store';
 import { connect, ConnectedProps } from 'react-redux';
 import { createTooltip } from '../utils/componentGenerators';
@@ -20,7 +20,7 @@ const mapState = (state: RootState) => ({
 })
 
 const mapDispatch = {
-  generateGame, openCorners
+  regenerateGame, openCorners
 }
 
 const connector = connect(mapState, mapDispatch);
@@ -68,17 +68,19 @@ const GameInfo: FC<GameInfoProps> = (props) => {
   return (
     <div className={styles.GameInfo}>
       {createTooltip('The number of flags left to be placed.',
-        <div className={styles.MinesRemaining}>{padValue(props.mines_remaining, padLenght)}</div>, 'bottom')}
-      {createTooltip('This button can be used to regenerate the game. To open all 4 corners on the board, right-click it. It also displays the current state of the game. If the button shows the text "Defeat", the game is lost. If the text is "Victory", then it is won. Otherwise, the game is still in progress.',
+        <div className={styles.MinesRemaining}>{padValue(props.mines_remaining, padLenght)}</div>, 'bottom', 500)}
+      {createTooltip('This button can be used to regenerate the game. Alternatively, the middle mouse button can be pressed anywhere on the game for the same purpose.' +
+        ' To open all 4 corners on the board, right-click it. It also displays the current state of the game. If the button shows the text "Defeat",' +
+        ' the game is lost. If the text is "Victory", then it is won. Otherwise, the game is still in progress.',
         <Button className={`${styles.Regenerate} Button`}
           onContextMenu={() => props.openCorners({})}
-          onClick={() => props.generateGame({ rows: props.rows, cols: props.cols, mines: props.mines, flagGuesses: props.flagGuesses, guesses: props.guesses })}>
+          onClick={() => props.regenerateGame(undefined)}>
           {props.lost ? 'Defeat' : (props.won ? 'Victory' : '⭮')}
         </Button>,
-        'bottom'
+        'bottom', 500
       )}
       {createTooltip('The timer of the game. This shows the number of seconds elapsed from the first move made until the game ended or now, if it is still in progress.',
-        <div className={styles.Timer}>{padValue(time, padLenght)}</div>, 'bottom')}
+        <div className={styles.Timer}>{padValue(time, padLenght)}</div>, 'bottom', 500)}
     </div>
   );
 }

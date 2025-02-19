@@ -26,6 +26,10 @@ export interface GameSlice extends GameParams, GameTools {
     movesMade: number,
     currentFlagGuesses: number,
     currentGuesses: number,
+    opening: [number, number] | undefined,
+    oldOpening: [number, number] | undefined,
+    chording: [number, number] | undefined
+    oldChording: [number, number] | undefined,
 }
 
 export interface PositionActionPayload {
@@ -51,7 +55,36 @@ const initialState: GameSlice = {
     flagGuessed: {},
     mistakes: {},
     guessing: false,
-    movesMade: 0
+    movesMade: 0,
+    opening: undefined,
+    oldOpening: undefined,
+    chording: undefined,
+    oldChording: undefined
+}
+
+function generateGameHelper(state: GameSlice) {
+    // set default params
+    state.currentFlagGuesses = state.flagGuesses;
+    state.currentGuesses = state.guesses;
+    state.opening = undefined;
+    state.oldOpening = undefined;
+    state.chording = undefined;
+    state.oldChording = undefined;
+    // set flagged, guesses and others
+    state.mistakes = {};
+    state.flagGuessed = {};
+    state.hidden = createBoolean(state.rows, state.cols, true);
+    state.flagged = createBoolean(state.rows, state.cols, false);
+    // set tool usage
+    state.guessing = false;
+    // set win state
+    state.won = false;
+    state.lost = false;
+    state.movesMade = 0;
+    state.cells_unopened = state.rows * state.cols;
+    state.mines_remaining = state.mines;
+    // create the new board
+    state.board = createBoard(state.rows, state.cols, state.mines);
 }
 
 // TODO: Set up a middleware to stop unwanted actions from going through at the end of the game
@@ -131,6 +164,9 @@ export const gameSlice = createSlice({
 
             chordBoardField(row, col, state.board[row][col], state);
         },
+        regenerateGame(state, _) {
+            generateGameHelper(state);
+        },
         generateGame: (state, action: PayloadAction<GameParams>) => {
             const { cols, rows, mines, guesses, flagGuesses } = action.payload;
             // set default params
@@ -138,24 +174,30 @@ export const gameSlice = createSlice({
             state.cols = cols;
             state.mines = mines;
             state.flagGuesses = flagGuesses;
-            state.currentFlagGuesses = flagGuesses;
+            // state.currentFlagGuesses = flagGuesses;
             state.guesses = guesses;
-            state.currentGuesses = guesses;
-            // set flagged, guesses and others
-            state.mistakes = {};
-            state.flagGuessed = {};
-            state.hidden = createBoolean(rows, cols, true);
-            state.flagged = createBoolean(rows, cols, false);
-            // set tool usage
-            state.guessing = false;
-            // set win state
-            state.won = false;
-            state.lost = false;
-            state.movesMade = 0;
-            state.cells_unopened = rows * cols;
-            state.mines_remaining = mines;
-            // create the new board
-            state.board = createBoard(rows, cols, mines);
+            // state.currentGuesses = guesses;
+
+            generateGameHelper(state);
+            // state.opening = undefined;
+            // state.oldOpening = undefined;
+            // state.chording = undefined;
+            // state.oldChording = undefined;
+            // // set flagged, guesses and others
+            // state.mistakes = {};
+            // state.flagGuessed = {};
+            // state.hidden = createBoolean(rows, cols, true);
+            // state.flagged = createBoolean(rows, cols, false);
+            // // set tool usage
+            // state.guessing = false;
+            // // set win state
+            // state.won = false;
+            // state.lost = false;
+            // state.movesMade = 0;
+            // state.cells_unopened = rows * cols;
+            // state.mines_remaining = mines;
+            // // create the new board
+            // state.board = createBoard(rows, cols, mines);
         },
         openCorners: (state, _) => {
             batchOpen([[0, 0], [0, state.cols - 1], [state.rows - 1, 0],
@@ -163,12 +205,27 @@ export const gameSlice = createSlice({
         },
         setGuessing: (state, action: PayloadAction<boolean>) => {
             state.guessing = action.payload;
+        },
+        setOpening: (state, action: PayloadAction<[number, number] | undefined>) => {
+            state.oldOpening = state.opening;
+            state.opening = action.payload;
+        },
+        setChording: (state, action: PayloadAction<[number, number] | undefined>) => {
+            state.oldChording = state.chording;
+            state.chording = action.payload;
+        },
+        resetOpeningChording: (state, _) => {
+            state.oldOpening = state.opening;
+            state.opening = undefined;
+
+            state.oldChording = state.chording;
+            state.chording = undefined;
         }
     }
 })
 
 export const { flagField, clickField, chordField,
-    generateGame, openCorners, setGuessing,
-    guessField, chordGuessedField } = gameSlice.actions;
+    generateGame, openCorners, setGuessing, regenerateGame,
+    guessField, chordGuessedField, setOpening, setChording, resetOpeningChording } = gameSlice.actions;
 
 export default gameSlice.reducer;

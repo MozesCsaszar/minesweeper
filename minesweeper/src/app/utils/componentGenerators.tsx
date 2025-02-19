@@ -6,8 +6,8 @@ import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.share
 import Tooltip from '@mui/material/Tooltip';
 import InfoIcon from '@mui/icons-material/Info';
 
-export function createTooltip(title: string, child: ReactElement, placement: 'right' | 'bottom' = 'right'): ReactElement {
-    return <Tooltip placement={placement} title={title} arrow>{child}</Tooltip>;
+export function createTooltip(title: string, child: ReactElement, placement: 'right' | 'bottom' = 'right', enterDelay: number = 0): ReactElement {
+    return <Tooltip enterDelay={enterDelay} placement={placement} title={title} arrow>{child}</Tooltip>;
 }
 
 export function createInfoTooltip(title: string, child: ReactElement): ReactElement {

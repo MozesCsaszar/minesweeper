@@ -13,15 +13,18 @@ interface FieldProps {
   flagGuessed: number | undefined,
   row: number,
   col: number,
+  hiddenAnimation: boolean,
   flagField: (params: PositionActionPayload) => void,
   guessField: (params: PositionActionPayload) => void,
-  clickField: (params: PositionActionPayload) => void,
+  openField: (params: PositionActionPayload) => void,
   chordField: (params: PositionActionPayload) => void,
   chordGuessedField: (params: PositionActionPayload) => void,
+  setOpening: (params: [number, number] | undefined) => void,
+  setChording: (params: [number, number] | undefined) => void,
 }
 
-const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, mistake, value, row, col,
-  flagField, clickField, chordField, guessField, chordGuessedField, flagGuessed }) => {
+const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, hiddenAnimation: hiddenAnimation, mistake, value, row, col,
+  flagField, openField: clickField, chordField, guessField, chordGuessedField, setOpening, setChording, flagGuessed }) => {
   let style_names: { readonly [key: string]: string } = { '🟌': 'Mine', ' ': 'Empty', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine' };
 
   function valueToString(value: number) {
@@ -43,18 +46,21 @@ const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, mistake, value, row
         {guessedVal != undefined ?
           <>
             {/* Foreground text */}
-            <div onClick={() => { !gameEnded ? chordGuessedField({ row, col }) : null }} className={`${styles.Symbol} ${styles.SmallSymbol} ${styles[style_names[valueToString(guessedVal)]]}`}>
+            <div className={`${styles.Symbol} ${styles.SmallSymbol} ${styles[style_names[valueToString(guessedVal)]]}`}
+              onMouseDown={(event) => { !gameEnded && event.button === 0 ? setChording([row, col]) : null }} onClick={() => { !gameEnded ? chordGuessedField({ row, col }) : null }} >
               {guessedVal}
             </div>
           </>
           : null}
       </div>
       {/* Top part */}
-      <button className={`${styles.Top} Button`} onClick={() => clickField({ row, col })} onContextMenu={() => flagField({ row, col })} hidden={!hidden}>
-
+      <button className={`${styles.Top} Button ${hiddenAnimation ? styles.Hidden : ''}`}
+        onMouseDown={(event) => { !gameEnded && event.button === 0 ? setOpening([row, col]) : null }} onClick={() => clickField({ row, col })}
+        onContextMenu={() => flagField({ row, col })} hidden={!hidden}>
         {/* Value part */}
       </button>
-      <div className={`${styles.Symbol} ${styles[style_names[valueString]]}`} suppressHydrationWarning onClick={() => chordField({ row, col })}>
+      <div className={`${styles.Symbol} ${styles[style_names[valueString]]}`} suppressHydrationWarning
+        onMouseDown={(event) => { !gameEnded && event.button === 0 ? setChording([row, col]) : null }} onClick={() => chordField({ row, col })}>
         {hidden ? '' : valueToString(value)}
       </div>
       {/* Background */}

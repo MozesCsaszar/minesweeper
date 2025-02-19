@@ -61,6 +61,11 @@
     background-color: var(--background-color-darker)
 }
 
+.Hidden {
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+}
+
 .Mistake {
     background-color: rgb(175, 60, 60);
 }
