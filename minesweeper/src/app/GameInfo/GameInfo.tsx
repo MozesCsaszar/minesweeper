@@ -4,6 +4,7 @@ import { GameParams, generateGame, openCorners } from '../reducers/gameSlice';
 import { RootState } from '../store';
 import { connect, ConnectedProps } from 'react-redux';
 import { createTooltip } from '../utils/componentGenerators';
+import { Button } from '@mui/material';
 
 
 const mapState = (state: RootState) => ({
@@ -69,11 +70,11 @@ const GameInfo: FC<GameInfoProps> = (props) => {
       {createTooltip('The number of flags left to be placed.',
         <div className={styles.MinesRemaining}>{padValue(props.mines_remaining, padLenght)}</div>, 'bottom')}
       {createTooltip('This button can be used to regenerate the game. To open all 4 corners on the board, right-click it. It also displays the current state of the game. If the button shows the text "Defeat", the game is lost. If the text is "Victory", then it is won. Otherwise, the game is still in progress.',
-        <button className={`${styles.Regenerate} Button`}
+        <Button className={`${styles.Regenerate} Button`}
           onContextMenu={() => props.openCorners({})}
           onClick={() => props.generateGame({ rows: props.rows, cols: props.cols, mines: props.mines, flagGuesses: props.flagGuesses, guesses: props.guesses })}>
           {props.lost ? 'Defeat' : (props.won ? 'Victory' : '⭮')}
-        </button>,
+        </Button>,
         'bottom'
       )}
       {createTooltip('The timer of the game. This shows the number of seconds elapsed from the first move made until the game ended or now, if it is still in progress.',

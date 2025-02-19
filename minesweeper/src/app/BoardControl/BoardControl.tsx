@@ -48,8 +48,8 @@ const Difficulties: { [key: string]: (DifficultyValues | undefined) } = {
     mineGuesses: 1
   },
   expert: {
-    rows: 30,
-    cols: 16,
+    rows: 16,
+    cols: 30,
     mines: 99,
     guesses: 3,
     mineGuesses: 2
@@ -58,15 +58,15 @@ const Difficulties: { [key: string]: (DifficultyValues | undefined) } = {
     rows: 30,
     cols: 30,
     mines: 225,
-    guesses: 5,
-    mineGuesses: 3
+    guesses: 7,
+    mineGuesses: 6
   },
   grandmaster: {
     rows: 50,
     cols: 50,
     mines: 833,
-    guesses: 10,
-    mineGuesses: 15
+    guesses: 15,
+    mineGuesses: 25
   },
   custom: undefined
 }
@@ -133,11 +133,10 @@ const BoardControl: FC<BoardControlProps> = (props) => {
   );
 
   return (
-    // TODO: Validate the inputs
     <div className='flex flex-col'>
       <div className='flex flex-row'>
-        <div>Game Options</div>
-        <Button onClick={() => setExpanded(!expanded)}>
+        <div className='basis-[100%] m-auto BoldText'>Game Options</div>
+        <Button className='Button' onClick={() => setExpanded(!expanded)}>
           {expanded ? 'Hide' : 'Show'}
         </Button>
       </div>
@@ -151,10 +150,10 @@ const BoardControl: FC<BoardControlProps> = (props) => {
           createInfoTooltip('The number of guesses allowed per game. When used, if clicking on an unopened cell, the cell will be opened if it does not contain a mine, flagged otherwise.', guessesInput),
           createInfoTooltip('The number of flag guesses allowed. To use, click on a flagged field. If it was not a mine, you lose. If it was a mine, a number will be displayed up on the flag showing the number of mines around the flagged cell (all 8 of them, excluding the center cell).', mineGuessesInput),]}
           {/* Difficulty (expected and current, if there is difference) */}
-          {createInfoTooltip('The mine density of the board, expressed in percentages. This shows the chance of any one field being a mine.', <label>Mine Density: {valid ? (getMineDensity(rows, cols, mines) * 100).toFixed(2) : '???'}%</label>)}
+          {createInfoTooltip('The mine density of the board, expressed in percentages. This shows the chance of any one field being a mine.', <div className='BoldText'>Mine Density: {valid ? (getMineDensity(rows, cols, mines) * 100).toFixed(2) : '???'}%</div>)}
           {/* <label>{(changed ? 'New Difficulty' : 'Difficluty') + ': ' + String(difficulty)}</label> */}
           {/* Update button */}
-          {createTooltip('Update the board with the current settings.', <Button disabled={!valid} className='Button' onClick={() => props.generateGame({ rows, cols, mines, flagGuesses: mineGuesses, guesses })}>Update</Button>, 'bottom')}
+          {createTooltip('Update the board with the current settings.', <Button key='UpdateButton' disabled={!valid} className='Button' onClick={() => props.generateGame({ rows, cols, mines, flagGuesses: mineGuesses, guesses })}>Update</Button>, 'bottom')}
         </div>
       </Collapse>
     </div>

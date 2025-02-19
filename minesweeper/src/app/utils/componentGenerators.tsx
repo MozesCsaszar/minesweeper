@@ -12,8 +12,8 @@ export function createTooltip(title: string, child: ReactElement, placement: 'ri
 
 export function createInfoTooltip(title: string, child: ReactElement): ReactElement {
     return <div className='flex flex-row'>
-        {<div className='flex flex-col'>{child}</div>}
-        {createTooltip(title, <InfoIcon />)}
+        {<div className='flex flex-col basis-[100%]'>{child}</div>}
+        {createTooltip(title, <InfoIcon className='basis-6 m-auto' />)}
     </div>
 }
 
@@ -229,7 +229,7 @@ export function createSelect(props: ToggleButtonGroupCreationProps): InputFieldD
 
     return [<>
         <InputLabel sx={{ display: hidden ? 'none' : null }} id={`${name}-select-label`}>{name}</InputLabel>
-        <Select value={value} onChange={onChange} disabled={disabled}
+        <Select value={value} onChange={onChange} disabled={disabled} variant='standard'
             sx={{ display: hidden ? 'none' : null }}>
             {generateMenuItems()}
         </Select>

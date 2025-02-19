@@ -51,14 +51,14 @@ const Game: FC<GameProps> = (props) => {
 
   // TODO: Style this a bit better
   return (
-    <div onContextMenu={(e) => e.preventDefault()} className={`${styles.Game} flex flex-row gap-1`}>
+    <div onContextMenu={(e) => e.preventDefault()} className={`${styles.Game} flex flex-row`}>
       {/* Controls and Tools */}
-      <div className='flex flex-col basis-[200px] ml-1 fixed z-10 bg-slate-500'>
+      <div className='Panel GameOptions flex flex-col basis-[200px] fixed z-10 p-1'>
         {<GameTools />}
         {<BoardControl />}
       </div>
       {/* Board */}
-      <div className='flex flex-col relative left-[200px]'>
+      <div className='flex flex-col relative left-[228px]'>
         {<GameInfo />}
         <div className={styles.Rows}>
           {rowElements}

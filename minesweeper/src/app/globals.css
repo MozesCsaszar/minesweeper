@@ -34,11 +34,68 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+input[type=checkbox] {
+  accent-color: rgb(236, 34, 27);
+  background-color: black;
+}
+
 .Button {
   background-color: var(--background-color);
+  color: var(--foreground);
+  border-radius: 0;
   border: var(--border-width) solid var(--border-color-dark);
   border-top: var(--border-width) solid var(--border-color-bright);
   border-left: var(--border-width) solid var(--border-color-bright);
+  padding: 0;
+}
+
+.Panel {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color-dark);
+}
+
+.MuiSelect-select {
+  padding: 1px;
+  padding-left: 5px;
+}
+
+
+.MuiFocused {
+  border-color: rgb(236, 34, 27);
+}
+
+.GameOptions .Mui-error {
+  width: 194;
+  font-weight: 600;
+}
+
+.MuiMenu-list {
+  padding: 0;
+}
+
+.MuiMenuItem-root {
+  padding: 0;
+  padding-left: 3px;
+  background-color: var(--background-color);
+  min-height: 0;
+}
+
+.BoldText {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.MuiFormLabel-root {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.MuiInput-input.Mui-disabled {
+  -webkit-text-fill-color: var(--border-color-dark);
+}
+
+.MuiInput-root::after {
+  border-color: rgb(236, 34, 27);
 }
 
 /* .Button:not(.NoHover):hover {
