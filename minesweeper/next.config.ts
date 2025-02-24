@@ -6,8 +6,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  assetPrefix: isProd ? '/minesweeper' : '',
-  basePath: isProd ? '/minesweeper' : '',
   output: 'export'
 };
 
