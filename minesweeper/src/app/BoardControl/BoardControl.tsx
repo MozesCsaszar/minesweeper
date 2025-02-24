@@ -3,7 +3,7 @@ import { generateGame } from '../reducers/gameSlice';
 import { RootState } from '../store';
 import { connect, ConnectedProps } from 'react-redux';
 import { getMineDensity } from '../utils/boardUtils';
-import { createInfoTooltip, createSelect, createTooltip, createValidatedTextField, InputMetadata, isFormValid } from '../utils/componentGenerators';
+import { createInfoTooltip, createSelect, createTooltip, createValidatedTextField, isFormValid } from '../utils/componentGenerators';
 import { ValidateMaxValue, ValidateMinValue } from '../utils/validators';
 import { Button, Collapse } from '@mui/material';
 
@@ -19,10 +19,6 @@ const mapDispatch = {
 }
 
 const connector = connect(mapState, mapDispatch);
-
-// TODO: Rename this
-interface BoardControlProps extends ConnectedProps<typeof connector> {
-}
 
 interface DifficultyValues {
   rows: number,
@@ -59,14 +55,14 @@ const Difficulties: { [key: string]: (DifficultyValues | undefined) } = {
     cols: 30,
     mines: 225,
     guesses: 7,
-    mineGuesses: 6
+    mineGuesses: 7
   },
   grandmaster: {
     rows: 50,
     cols: 50,
     mines: 750,
-    guesses: 15,
-    mineGuesses: 25
+    guesses: 25,
+    mineGuesses: 50
   },
   custom: undefined
 }
@@ -74,14 +70,14 @@ const Difficulties: { [key: string]: (DifficultyValues | undefined) } = {
 const defaultDifficulty = 'beginner';
 const defaultDifficultyValues = Difficulties[defaultDifficulty];
 
-const BoardControl: FC<BoardControlProps> = (props) => {
-  function boardSizeChanged() {
-    return String(props.rows) != rowsValue || String(props.cols) != colsValue || String(props.mines) != minesValue;
-  }
+const BoardControl: FC<ConnectedProps<typeof connector>> = (props) => {
+  // function boardSizeChanged() {
+  //   return String(props.rows) != rowsValue || String(props.cols) != colsValue || String(props.mines) != minesValue;
+  // }
 
   function changeDifficulty(value: string) {
     if (value != 'custom') {
-      let d = Difficulties[value];
+      const d = Difficulties[value];
       if (d != undefined) {
         rowsSetValue(String(d.rows));
         colsSetValue(String(d.cols));
@@ -95,7 +91,7 @@ const BoardControl: FC<BoardControlProps> = (props) => {
   const [expanded, setExpanded] = useState(true);
 
   // create the difficulty select
-  const [difficultyInput, difficultyMessage, difficultyValue, difficultySetValue] = createSelect({
+  const [difficultyInput, difficultyMessage, difficultyValue] = createSelect({
     name: 'Difficulty', defVal: defaultDifficulty, required: true,
     values: Object.keys(Difficulties), names: (v) => v[0].toUpperCase() + v.slice(1),
     onValidChange: changeDifficulty
@@ -104,11 +100,11 @@ const BoardControl: FC<BoardControlProps> = (props) => {
   // create board selects
   const [rowsInput, rowsMessage, rowsValue, rowsSetValue] = createValidatedTextField({
     name: 'Rows', defVal: String(defaultDifficultyValues!.rows), validators: [ValidateMinValue(5), ValidateMaxValue(100)],
-    required: true, disabled: difficultyValue != 'custom'
+    required: true, disabled: difficultyValue != 'custom',
   })
   const [colsInput, colsMessage, colsValue, colsSetValue] = createValidatedTextField({
     name: 'Cols', defVal: String(defaultDifficultyValues!.cols), validators: [ValidateMinValue(5), ValidateMaxValue(100)],
-    required: true, disabled: difficultyValue != 'custom'
+    required: true, disabled: difficultyValue != 'custom',
   })
   const rowsColsValid = rowsMessage == '' && colsMessage == '';
   const area = rowsColsValid ? Number(rowsValue) * Number(colsValue) : 0;

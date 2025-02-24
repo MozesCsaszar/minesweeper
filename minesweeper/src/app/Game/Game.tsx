@@ -3,7 +3,6 @@
 import React, { FC, useEffect } from 'react';
 import Row from '../Row/Row';
 import styles from './Game.module.css';
-import * as _ from 'lodash';
 import GameInfo from '../GameInfo/GameInfo';
 import BoardControl from '../BoardControl/BoardControl';
 import { connect, ConnectedProps } from 'react-redux';
@@ -24,9 +23,7 @@ const mapDispatch = {
 
 const connector = connect(mapState, mapDispatch);
 
-interface GameProps extends ConnectedProps<typeof connector> { }
-
-const Game: FC<GameProps> = (props) => {
+const Game: FC<ConnectedProps<typeof connector>> = (props) => {
   function gameEnded() {
     return props.game.won || props.game.lost;
   }
@@ -35,11 +32,11 @@ const Game: FC<GameProps> = (props) => {
   useEffect(() => {
     props.generateGame({
       rows: props.game.rows, cols: props.game.cols, mines:
-        props.game.mines, flagGuesses: 3, guesses: 1
+        props.game.mines, flagGuesses: 0, guesses: 3
     })
-  }, []);
+  }, [props.game.rows, props.game.cols, props.game.mines]);
 
-  let rowElements = [];
+  const rowElements = [];
 
   for (let i = 0; i < props.game.rows; i++) {
     rowElements.push(<Row key={`row-${i}`}
@@ -55,7 +52,7 @@ const Game: FC<GameProps> = (props) => {
   // TODO: Style this a bit better
   return (
     <div className={`${styles.Game} flex flex-row h-[100%]`} onContextMenu={(e) => e.preventDefault()}
-      onMouseUp={() => props.resetOpeningChording(undefined)} onAuxClick={(event) => event.button === 1 ? props.regenerateGame(undefined) : null}>
+      onMouseUp={() => props.resetOpeningChording(undefined)} onAuxClick={(event) => { if (event.button === 1) { event.preventDefault(); props.regenerateGame(undefined); return false; } }}>
       {/* Controls and Tools */}
       <div className='Panel GameOptions flex flex-col basis-[200px] fixed z-10 p-1'>
         {<GameTools />}

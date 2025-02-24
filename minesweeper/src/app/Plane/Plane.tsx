@@ -1,7 +1,9 @@
 import React, { FC } from 'react';
 import styles from './Plane.module.css';
 
-interface PlaneProps {}
+interface PlaneProps {
+  layer: number
+}
 
 const Plane: FC<PlaneProps> = () => (
   <div className={styles.Plane}>

@@ -32,7 +32,7 @@ export function getMinesAround(row: number, col: number, board: number[][]) {
 export function chordBoardField(row: number, col: number, mineTarget: number, state: GameSlice) {
     // count the number of mines around the current field
     let flagCount = 0;
-    let nonFlagged: [number, number][] = [];
+    const nonFlagged: [number, number][] = [];
     // collect the non-flagged tiles around the clicked tile
     for (let i = row - 1; i < row + 2; i++) {
         for (let j = col - 1; j < col + 2; j++) {
@@ -68,7 +68,7 @@ export function toggleBoardFlag(row: number, col: number, state: GameSlice) {
 }
 
 export function createBoard(rows: number, cols: number, mines: number): number[][] {
-    let board: number[][] = [];
+    const board: number[][] = [];
     // generate board
     for (let i = 0; i < rows; i++) {
         board.push([]);
@@ -80,7 +80,7 @@ export function createBoard(rows: number, cols: number, mines: number): number[]
     // add mines in a way that guarantees a certain number of mines on the board
     let mines_added = 0;
     while (mines_added < mines) {
-        let [i, j] = [RandInt(rows), RandInt(cols)];
+        const [i, j] = [RandInt(rows), RandInt(cols)];
         // don't allow mines on corners
         if ([[0, cols - 1], [0, 0], [rows - 1, 0], [rows - 1, cols - 1]].find(v => i == v[0] && j == v[1]) == undefined) {
             mines_added += board[i][j] == -1 ? 0 : 1;
@@ -101,7 +101,7 @@ export function createBoard(rows: number, cols: number, mines: number): number[]
 }
 
 export function createBoolean(rows: number, cols: number, value: boolean): boolean[][] {
-    let hidden: boolean[][] = [];
+    const hidden: boolean[][] = [];
     for (let i = 0; i < rows; i++) {
         hidden.push([]);
         for (let j = 0; j < cols; j++) {
@@ -114,8 +114,8 @@ export function createBoolean(rows: number, cols: number, value: boolean): boole
 
 function endGameStatistics(state: GameSlice) {
     // figure out the mistakes in flag placement
-    let mistakes: { [key: number]: { [key: number]: boolean } } = {};
-    let flagged = _.cloneDeep(state.flagged);
+    const mistakes: { [key: number]: { [key: number]: boolean } } = {};
+    const flagged = _.cloneDeep(state.flagged);
     for (let i = 0; i < state.flagged.length; i++) {
         for (let j = 0; j < state.flagged[i].length; j++) {
             if (state.flagged[i][j] && state.board[i][j] != -1) {
@@ -131,7 +131,7 @@ function endGameStatistics(state: GameSlice) {
 }
 
 export function setLost(last_move: [number, number], state: GameSlice): void {
-    let { mistakes, flagged } = endGameStatistics(state);
+    const { mistakes, flagged } = endGameStatistics(state);
     // set the incorrect mine open as a mistake
     if (mistakes[last_move[0]] == undefined) {
         mistakes[last_move[0]] = {};
@@ -145,12 +145,12 @@ export function setLost(last_move: [number, number], state: GameSlice): void {
 }
 
 function setHidden(hidden: boolean[][], cells_unopened: number, state: GameSlice): void {
-    let won = cells_unopened == state.mines;
+    const won = cells_unopened == state.mines;
 
     // if victory was achieved
     if (won) {
         // create new state for flagged which flags all of the mines
-        let flagged = createBoolean(state.rows, state.cols, false);
+        const flagged = createBoolean(state.rows, state.cols, false);
         for (let i = 0; i < state.rows; i++) {
             for (let j = 0; j < state.cols; j++) {
                 flagged[i][j] = state.board[i][j] == -1;
@@ -177,7 +177,7 @@ export function batchOpen(opens: [number, number][], state: GameSlice): void {
 
     // check whether there is a mine between the opens
     for (let i = 0; i < opens.length; i++) {
-        let [row, col] = opens[i];
+        const [row, col] = opens[i];
         if (state.board[row][col] == -1) {
             setLost([row, col], state);
             return;
@@ -185,13 +185,13 @@ export function batchOpen(opens: [number, number][], state: GameSlice): void {
     }
     // if no mines were found, countinue with opening the needed fields
     // save which rows were changed to aviod copying unnecessary data
-    let changed: { [key: number]: { [key: number]: boolean } } = {};
-    let empties: number[][] = [];
+    const changed: { [key: number]: { [key: number]: boolean } } = {};
+    const empties: number[][] = [];
     let opened = 0;
 
     // go through each of the opens, open them and check if they were empty
     for (let i = 0; i < opens.length; i++) {
-        let [row, col] = opens[i];
+        const [row, col] = opens[i];
         if (state.hidden[row][col]) {
             if (changed[row] == undefined) {
                 changed[row] = [];
@@ -208,7 +208,7 @@ export function batchOpen(opens: [number, number][], state: GameSlice): void {
 
     // while new empty fields have been opened, open all cells around them
     while (empties.length > 0) {
-        let [row, col] = empties[0];
+        const [row, col] = empties[0];
         empties.shift();
 
         // go around all of the empty locations and find everything to be uncovered
@@ -238,12 +238,12 @@ export function batchOpen(opens: [number, number][], state: GameSlice): void {
         }
     }
 
-    let hidden: boolean[][] = [...state.hidden];
+    const hidden: boolean[][] = [...state.hidden];
     let newArr: boolean[] = [];
 
-    for (let i in changed) {
+    for (const i in changed) {
         newArr = _.cloneDeep(state.hidden[i]);
-        for (let key in changed[i]) {
+        for (const key in changed[i]) {
             newArr[Number(key)] = false;
         }
         hidden[Number(i)] = newArr;

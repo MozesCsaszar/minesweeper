@@ -37,7 +37,7 @@ const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlic
     return false;
   }
 
-  let fields = [];
+  const fields = [];
 
   if (boardSlice != undefined) {
     for (let j = 0; j < boardSlice.length; j++) {
@@ -57,6 +57,6 @@ const Row: FC<RowProps> = ({ boardSlice, hiddenSlice, flaggedSlice, mistakesSlic
   );
 };
 
-const arePropsEqual = (prevProps: Readonly<RowProps>, nextProps: Readonly<RowProps>) => { return prevProps.gameEnded == nextProps.gameEnded && prevProps.flaggedSlice === nextProps.flaggedSlice && prevProps.hiddenSlice === nextProps.hiddenSlice };
+// const arePropsEqual = (prevProps: Readonly<RowProps>, nextProps: Readonly<RowProps>) => { return prevProps.gameEnded == nextProps.gameEnded && prevProps.flaggedSlice === nextProps.flaggedSlice && prevProps.hiddenSlice === nextProps.hiddenSlice };
 
 export default memo(Row);

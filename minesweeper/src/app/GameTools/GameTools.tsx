@@ -19,10 +19,8 @@ const mapDispatch = {
 
 const connector = connect(mapState, mapDispatch);
 
-interface GameToolsProps extends ConnectedProps<typeof connector> { }
-
-const GameTools: FC<GameToolsProps> = (props) => {
-  function generateToolUI(value: number, label: string, onClick: () => {}, selected: boolean) {
+const GameTools: FC<ConnectedProps<typeof connector>> = (props) => {
+  function generateToolUI(value: number, label: string, onClick: () => void, selected: boolean) {
     return <div className={`${styles.NumericInput} flex flex-row`}>
       <label>
         {`${label}: `}
@@ -35,9 +33,9 @@ const GameTools: FC<GameToolsProps> = (props) => {
 
   return (
     <div className='flex flex-col'>
-      {createInfoTooltip('To use a guess, please select the checkbox. This will guarantee that a cell opening will not result in a loss. For more details, see tooltip at game options.',
+      {createInfoTooltip('To use a guess, please select the checkbox. This will guarantee that a cell opening will not result in a loss. For more details, see the tooltip next to "Guesses" at game options.',
         generateToolUI(props.currentGuesses, 'Guesses', () => props.setGuessing(!props.guessing), props.guessing))}
-      {createInfoTooltip('The number of flag guesses remaining. When clicking on a flag, this provide more information if it has any uses. If the tile was not a mine, the game is lost. For more details, see tooltip at game options.',
+      {createInfoTooltip('The number of flag guesses remaining. When clicking on a flag, this provide more information if it has any uses. If the tile was not a mine, the game is lost. For more details, see the tooltip next to "Flag Guesses" at game options.',
         <NumericInput value={props.currentFlagGuesses} disabled label={'Flag Guesses'} />)}
     </div>
   );

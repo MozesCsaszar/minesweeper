@@ -40,11 +40,11 @@ function createValidatedState(defVal: string): [string, Dispatch<SetStateAction<
  * @returns At return, the message of the will be '' or a validator error, the value of the input will be value
  */
 function setValueValidate(value: string, setValue: Dispatch<SetStateAction<string>>, setMessage: Dispatch<SetStateAction<string>>,
-    validators: TextFieldValidator[], onValidChange: (value: string) => void = (value: string) => { }) {
+    validators: TextFieldValidator[], onValidChange: (value: string) => void = () => { }) {
     setValue(value);
 
-    for (let v of validators) {
-        let m = v(value);
+    for (const v of validators) {
+        const m = v(value);
         if (m != '') {
             setMessage(m);
             return;
@@ -189,13 +189,13 @@ export function createToggleButtonGroup(props: ToggleButtonGroupCreationProps): 
         return values.map((v, i) => createToggleButton(v, labels[i]));
     }
 
-    function onChange(event: MouseEvent<HTMLElement>, value: any) {
+    function onChange(event: MouseEvent<HTMLElement>, value: string) {
         if (!required || (required && value)) {
             setValueValidate(value ?? '', setValue, setMessage, [ValidateApparence(values, !required)], onValidChange);
         }
     }
 
-    let { name, values, defVal, disabled, names, onValidChange, required, hidden } = replaceOptionalButtonGroupCreationProps(props);
+    const { name, values, defVal, disabled, names, onValidChange, required, hidden } = replaceOptionalButtonGroupCreationProps(props);
 
     const [message, setMessage, value, setValue] = createValidatedState(defVal);
 
@@ -213,7 +213,7 @@ export function createToggleButtonGroup(props: ToggleButtonGroupCreationProps): 
 
 export function createSelect(props: ToggleButtonGroupCreationProps): InputFieldData {
     function onChange(event: SelectChangeEvent<string>) {
-        let value = event.target.value;
+        const value = event.target.value;
         if (!required || (required && value)) {
             setValueValidate(value ?? '', setValue, setMessage, [ValidateApparence(values, !required)], onValidChange);
         }
@@ -223,7 +223,7 @@ export function createSelect(props: ToggleButtonGroupCreationProps): InputFieldD
         return names.map((v, i) => <MenuItem key={values[i]} value={values[i]}>{names[i]}</MenuItem>);
     }
 
-    let { name, values, defVal, disabled, names, onValidChange, required, hidden } = replaceOptionalButtonGroupCreationProps(props);
+    const { name, values, defVal, disabled, names, onValidChange, required, hidden } = replaceOptionalButtonGroupCreationProps(props);
 
     const [message, setMessage, value, setValue] = createValidatedState(defVal);
 
@@ -279,7 +279,7 @@ function createInput(inputMetadata: InputMetadata): InputFieldData {
 function createInputs(inputsMetadata: InputMetadata[]): [ReactElement[], string[], string[], Dispatch<SetStateAction<string>>[], boolean[]] {
     const [inputs, messages, values, setValues, hidden]: [ReactElement[], string[], string[], Dispatch<SetStateAction<string>>[], boolean[]] = [[], [], [], [], []];
 
-    for (let inputMetadata of inputsMetadata) {
+    for (const inputMetadata of inputsMetadata) {
         const [input, message, value, setValue] = createInput(inputMetadata);
 
         inputs.push(input); messages.push(message);
@@ -311,7 +311,7 @@ export function createURLFilterForm(searchButtonText: string, inputsMetadata: UR
     function addParamsToURL() {
         // udpate searchParams
         for (let i = 0; i < inputsMetadata.length; i++) {
-            let inputMetadata = inputsMetadata[i];
+            const inputMetadata = inputsMetadata[i];
             // only add it if the input is not hidden
             if (!inputMetadata.create.props.hidden) {
                 // if the value is in the filter URL keyword
@@ -345,7 +345,7 @@ export function createURLFilterForm(searchButtonText: string, inputsMetadata: UR
     function onRefresh() {
         // extract and update values of the inputs
         for (let i = 0; i < inputsMetadata.length; i++) {
-            let inputMetadata = inputsMetadata[i];
+            const inputMetadata = inputsMetadata[i];
             // only update value if the input is not hidden
             if (!inputMetadata.create.props.hidden) {
                 let value: string;
@@ -366,8 +366,8 @@ export function createURLFilterForm(searchButtonText: string, inputsMetadata: UR
     function onClear() {
         // extract all of the values and update the URLs
         for (let i = 0; i < inputsMetadata.length; i++) {
-            let inputMetadata = inputsMetadata[i];
-            let defVal = inputMetadata.create.props.defVal || '';
+            const inputMetadata = inputsMetadata[i];
+            const defVal = inputMetadata.create.props.defVal || '';
             // if the value is in the filter URL keyword
             if (inputMetadata.filterMethod != '') {
                 if (defVal != '') {
@@ -395,13 +395,13 @@ export function createURLFilterForm(searchButtonText: string, inputsMetadata: UR
     // create the inputs
     const [inputs, messages, values, setValues, hidden] = createInputs(inputsMetadata);
 
-    let valid = isFormValid(messages, hidden);
-    let buttons = [<Button disabled={!valid} onClick={valid ? onSubmit : undefined}>{searchButtonText}</Button>];
+    const valid = isFormValid(messages, hidden);
+    const buttons = [<Button key='Submit' disabled={!valid} onClick={valid ? onSubmit : undefined}>{searchButtonText}</Button>];
     if (clearButton) {
-        buttons.unshift(<Button onClick={onClear}>Clear</Button>);
+        buttons.unshift(<Button key='Clear' onClick={onClear}>Clear</Button>);
     }
 
-    useEffect(() => onRefresh, [searchParams]);
+    useEffect(() => onRefresh, [searchParams, onRefresh]);
     // create the button
     return [inputs, buttons, values]
 }
@@ -417,10 +417,10 @@ export function createURLFilterForm(searchButtonText: string, inputsMetadata: UR
  */
 export function createForm(searchButtonText: string, inputsMetadata: InputMetadata[], onSubmit?: (values: string[]) => void): FormData {
     // create the inputs
-    const [inputs, messages, values, setValues, hidden] = createInputs(inputsMetadata);
+    const [inputs, messages, values, , hidden] = createInputs(inputsMetadata);
 
-    let valid = isFormValid(messages, hidden);
-    let buttons = [<Button disabled={!valid} onClick={valid && onSubmit ? () => { onSubmit(values) } : undefined}>{searchButtonText}</Button>];
+    const valid = isFormValid(messages, hidden);
+    const buttons = [<Button key='Submit' disabled={!valid} onClick={valid && onSubmit ? () => { onSubmit(values) } : undefined}>{searchButtonText}</Button>];
     return [inputs, buttons, values]
 }
 

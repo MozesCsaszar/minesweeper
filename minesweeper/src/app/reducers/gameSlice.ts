@@ -164,7 +164,7 @@ export const gameSlice = createSlice({
 
             chordBoardField(row, col, state.board[row][col], state);
         },
-        regenerateGame(state, _) {
+        regenerateGame(state) {
             generateGameHelper(state);
         },
         generateGame: (state, action: PayloadAction<GameParams>) => {
@@ -199,7 +199,7 @@ export const gameSlice = createSlice({
             // // create the new board
             // state.board = createBoard(rows, cols, mines);
         },
-        openCorners: (state, _) => {
+        openCorners: (state) => {
             batchOpen([[0, 0], [0, state.cols - 1], [state.rows - 1, 0],
             [state.rows - 1, state.cols - 1]], state);
         },
@@ -214,7 +214,7 @@ export const gameSlice = createSlice({
             state.oldChording = state.chording;
             state.chording = action.payload;
         },
-        resetOpeningChording: (state, _) => {
+        resetOpeningChording: (state) => {
             state.oldOpening = state.opening;
             state.opening = undefined;
 

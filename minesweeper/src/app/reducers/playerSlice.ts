@@ -29,7 +29,7 @@ export const playerSlice = createSlice({
         addResources: (state, action: PayloadAction<PlayerResources>) => {
             state.money += action.payload.money;
             state.experience += action.payload.experience;
-            for (let key in state.materials) {
+            for (const key in state.materials) {
                 state.materials[key] += action.payload.materials[key];
             }
         }

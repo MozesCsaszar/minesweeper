@@ -26,14 +26,10 @@ const mapDispatch = {
 const connector = connect(mapState, mapDispatch);
 
 
-interface GameInfoProps extends ConnectedProps<typeof connector> {
-
-}
-
-const GameInfo: FC<GameInfoProps> = (props) => {
+const GameInfo: FC<ConnectedProps<typeof connector>> = (props) => {
   function padValue(value: number, len: number) {
-    let s: string = String(value);
-    let l = len - s.length;
+    const s: string = String(value);
+    const l = len - s.length;
     return '0'.repeat(l < 0 ? 0 : l) + s;
   }
 
@@ -41,11 +37,12 @@ const GameInfo: FC<GameInfoProps> = (props) => {
 
   const padLenght = 4;
   const gameEnded = props.won || props.lost;
+  const noMovesMade = props.movesMade == 0;
 
   // count the time
   useEffect(() => {
     if (!gameEnded) {
-      if (props.movesMade != 0) {
+      if (!noMovesMade) {
         let t = 0;
         const int = setInterval(() => {
           t++;
@@ -60,27 +57,27 @@ const GameInfo: FC<GameInfoProps> = (props) => {
         setTime(0);
       }
     }
-    else if (props.movesMade == 0) {
+    else if (noMovesMade) {
       setTime(0);
     }
-  }, [props.movesMade == 0, gameEnded])
+  }, [noMovesMade, gameEnded])
 
   return (
     <div className={styles.GameInfo}>
       {createTooltip('The number of flags left to be placed.',
-        <div className={styles.MinesRemaining}>{padValue(props.mines_remaining, padLenght)}</div>, 'bottom', 500)}
+        <div className={styles.MinesRemaining}>{padValue(props.mines_remaining, padLenght)}</div>, 'bottom', 650)}
       {createTooltip('This button can be used to regenerate the game. Alternatively, the middle mouse button can be pressed anywhere on the game for the same purpose.' +
         ' To open all 4 corners on the board, right-click it. It also displays the current state of the game. If the button shows the text "Defeat",' +
         ' the game is lost. If the text is "Victory", then it is won. Otherwise, the game is still in progress.',
         <Button className={`${styles.Regenerate} Button`}
-          onContextMenu={() => props.openCorners({})}
+          onContextMenu={() => props.openCorners()}
           onClick={() => props.regenerateGame(undefined)}>
           {props.lost ? 'Defeat' : (props.won ? 'Victory' : '⭮')}
         </Button>,
-        'bottom', 500
+        'bottom', 650
       )}
       {createTooltip('The timer of the game. This shows the number of seconds elapsed from the first move made until the game ended or now, if it is still in progress.',
-        <div className={styles.Timer}>{padValue(time, padLenght)}</div>, 'bottom', 500)}
+        <div className={styles.Timer}>{padValue(time, padLenght)}</div>, 'bottom', 650)}
     </div>
   );
 }

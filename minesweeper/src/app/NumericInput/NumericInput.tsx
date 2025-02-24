@@ -2,17 +2,15 @@ import React, { ChangeEvent, FC } from 'react';
 import styles from './NumericInput.module.css';
 
 interface NumericInputProps {
-  min?: number,
-  max?: number,
   value: number,
-  setValue?: Function,
+  setValue?: (s: string) => void,
   label: string,
   disabled?: boolean
 }
 
-const NumericInput: FC<NumericInputProps> = ({ label, min, max, value, setValue, disabled }) => {
+const NumericInput: FC<NumericInputProps> = ({ label, value, setValue, disabled }) => {
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    let v = Number(e.target.value);
+    const v = e.target.value;
 
     setValue?.(v);
   }

@@ -1,7 +1,6 @@
 Style:
-    -add animations to cell being held down/flagged/chorded
-    -add animations to cell's neightbors when being chorded
     -make tooltips a bit more exact (closer to the icon they are tool tipping)
+    -validate game options when changing row/col inputs
 
 Functionalities:
     -add a way to estimate 50/50 guesses and number of items needed to be used

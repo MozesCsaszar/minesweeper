@@ -10,10 +10,10 @@ type FilterObject = { [key: string]: { method: string, value: string } };
  * @returns An object that has the key, method and value information
  */
 export function separateFilter(filter: string): FilterObject {
-    let separated: FilterObject = {};
+    const separated: FilterObject = {};
 
     if (filter != '') {
-        let filterArray: string[] = filter.substring(1, filter.length - 1).split(',');
+        const filterArray: string[] = filter.substring(1, filter.length - 1).split(',');
         for (let i = 0; i < filterArray.length; i += 3) {
             if (i + 2 < filterArray.length) {
                 separated[filterArray[i]] = { method: filterArray[i + 1], value: filterArray[i + 2] }
@@ -30,10 +30,10 @@ export function separateFilter(filter: string): FilterObject {
  * @returns The joined FilterObject
  */
 function joinFilter(filters: FilterObject[]): FilterObject {
-    let newFilter: FilterObject = {};
+    const newFilter: FilterObject = {};
 
-    for (let filter of filters) {
-        for (let key in filter) {
+    for (const filter of filters) {
+        for (const key in filter) {
             newFilter[key] = { method: filter[key].method, value: filter[key].value };
         }
     }
@@ -47,8 +47,8 @@ function joinFilter(filters: FilterObject[]): FilterObject {
  * @returns The filter string
  */
 function filterToString(filter: FilterObject): string {
-    let filterStr: string[] = [];
-    for (let key in filter) {
+    const filterStr: string[] = [];
+    for (const key in filter) {
         filterStr.push(`${key},${filter[key].method},${filter[key].value}`);
     }
 
@@ -94,13 +94,13 @@ export function addKeyToFilterSearchParams(params: URLSearchParams | ReadonlyURL
  * @returns The new SearchParams
  */
 export function addFilterToSearchParams(params: URLSearchParams | ReadonlyURLSearchParams, value: string): URLSearchParams {
-    let newParams = new URLSearchParams(params);
-    let filter = params.get('filter') ?? '';
+    const newParams = new URLSearchParams(params);
+    const filter = params.get('filter') ?? '';
     let finalFilter: FilterObject;
 
     if (filter != '') {
-        let oldFilter = separateFilter(filter);
-        let newFilter = separateFilter(value);
+        const oldFilter = separateFilter(filter);
+        const newFilter = separateFilter(value);
         finalFilter = joinFilter([oldFilter, newFilter]);
     }
     else {
@@ -119,10 +119,10 @@ export function addFilterToSearchParams(params: URLSearchParams | ReadonlyURLSea
  * @returns The new SearchParams
  */
 export function removeKeyFromFilter(params: URLSearchParams | ReadonlyURLSearchParams, key: string) {
-    let newParams = new URLSearchParams(params);
+    const newParams = new URLSearchParams(params);
 
-    let filter = params.get('filter') ?? '';
-    let filterObj = separateFilter(filter);
+    const filter = params.get('filter') ?? '';
+    const filterObj = separateFilter(filter);
     if (filterObj[key]) {
         delete filterObj[key];
     }
@@ -140,7 +140,7 @@ export function removeKeyFromFilter(params: URLSearchParams | ReadonlyURLSearchP
  * @returns The new SearchParams
  */
 export function updateSearchParams(params: URLSearchParams | ReadonlyURLSearchParams, key: string, value: string) {
-    let newParams = new URLSearchParams(params);
+    const newParams = new URLSearchParams(params);
 
     if (value) {
         newParams.set(key, value);

@@ -25,7 +25,7 @@ interface FieldProps {
 
 const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, hiddenAnimation: hiddenAnimation, mistake, value, row, col,
   flagField, openField: clickField, chordField, guessField, chordGuessedField, setOpening, setChording, flagGuessed }) => {
-  let style_names: { readonly [key: string]: string } = { '🟌': 'Mine', ' ': 'Empty', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine' };
+  const style_names: { readonly [key: string]: string } = { '🟌': 'Mine', ' ': 'Empty', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine' };
 
   function valueToString(value: number) {
     return value == -1 ? '🟌' : (value == 0 ? ' ' : String(value));
@@ -47,7 +47,7 @@ const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, hiddenAnimation: hi
           <>
             {/* Foreground text */}
             <div className={`${styles.Symbol} ${styles.SmallSymbol} ${styles[style_names[valueToString(guessedVal)]]}`}
-              onMouseDown={(event) => { !gameEnded && event.button === 0 ? setChording([row, col]) : null }} onClick={() => { !gameEnded ? chordGuessedField({ row, col }) : null }} >
+              onMouseDown={(event) => { if (!gameEnded && event.button === 0) setChording([row, col]) }} onClick={() => { if (!gameEnded) chordGuessedField({ row, col }) }} >
               {guessedVal}
             </div>
           </>
@@ -55,12 +55,12 @@ const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, hiddenAnimation: hi
       </div>
       {/* Top part */}
       <button className={`${styles.Top} Button ${hiddenAnimation ? styles.Hidden : ''}`}
-        onMouseDown={(event) => { !gameEnded && event.button === 0 ? setOpening([row, col]) : null }} onClick={() => clickField({ row, col })}
+        onMouseDown={(event) => { if (!gameEnded && event.button === 0) setOpening([row, col]) }} onClick={() => clickField({ row, col })}
         onContextMenu={() => flagField({ row, col })} hidden={!hidden}>
         {/* Value part */}
       </button>
       <div className={`${styles.Symbol} ${styles[style_names[valueString]]}`} suppressHydrationWarning
-        onMouseDown={(event) => { !gameEnded && event.button === 0 ? setChording([row, col]) : null }} onClick={() => chordField({ row, col })}>
+        onMouseDown={(event) => { if (!gameEnded && event.button === 0) setChording([row, col]) }} onClick={() => chordField({ row, col })}>
         {hidden ? '' : valueToString(value)}
       </div>
       {/* Background */}
@@ -71,9 +71,9 @@ const Field: FC<FieldProps> = ({ gameEnded, flagged, hidden, hiddenAnimation: hi
   );
 };
 
-const arePropsEqual = (prevProps: Readonly<FieldProps>, nextProps: Readonly<FieldProps>) => {
-  return prevProps.gameEnded == nextProps.gameEnded &&
-    prevProps.flagged == nextProps.gameEnded && prevProps.hidden == nextProps.hidden
-};
+// const arePropsEqual = (prevProps: Readonly<FieldProps>, nextProps: Readonly<FieldProps>) => {
+//   return prevProps.gameEnded == nextProps.gameEnded &&
+//     prevProps.flagged == nextProps.gameEnded && prevProps.hidden == nextProps.hidden
+// };
 
 export default React.memo(Field);
