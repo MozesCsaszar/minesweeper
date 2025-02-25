@@ -25,44 +25,44 @@ interface DifficultyValues {
   cols: number,
   mines: number,
   guesses: number,
-  mineGuesses: number
+  flagGuesses: number
 }
 
-const Difficulties: { [key: string]: (DifficultyValues | undefined) } = {
+export const Difficulties: { [key: string]: (DifficultyValues | undefined) } = {
   beginner: {
     rows: 10,
     cols: 10,
     mines: 15,
     guesses: 3,
-    mineGuesses: 0
+    flagGuesses: 0
   },
   intermediate: {
     rows: 16,
     cols: 16,
     mines: 40,
     guesses: 3,
-    mineGuesses: 1
+    flagGuesses: 1
   },
   expert: {
     rows: 16,
     cols: 30,
     mines: 99,
     guesses: 3,
-    mineGuesses: 2
+    flagGuesses: 2
   },
   master: {
     rows: 30,
     cols: 30,
     mines: 225,
     guesses: 7,
-    mineGuesses: 7
+    flagGuesses: 7
   },
   grandmaster: {
     rows: 50,
     cols: 50,
     mines: 750,
     guesses: 25,
-    mineGuesses: 50
+    flagGuesses: 50
   },
   custom: undefined
 }
@@ -83,7 +83,7 @@ const BoardControl: FC<ConnectedProps<typeof connector>> = (props) => {
         colsSetValue(String(d.cols));
         minesSetValue(String(d.mines));
         guessesSetValue(String(d.guesses));
-        mineGuessesSetValue(String(d.mineGuesses));
+        flagGuessesSetValue(String(d.flagGuesses));
       }
     }
   }
@@ -116,15 +116,15 @@ const BoardControl: FC<ConnectedProps<typeof connector>> = (props) => {
     name: 'Guesses', defVal: String(defaultDifficultyValues!.guesses), validators: [ValidateMinValue(0), ValidateMaxValue(1000)],
     required: true, disabled: difficultyValue != 'custom'
   })
-  const [mineGuessesInput, mineGuessesMessage, mineGuessesValue, mineGuessesSetValue] = createValidatedTextField({
-    name: 'Flag Guesses', defVal: String(defaultDifficultyValues!.mineGuesses), validators: [ValidateMinValue(0), ValidateMaxValue(1000)],
+  const [flagGuessesInput, flagGuessesMessage, flagGuessesValue, flagGuessesSetValue] = createValidatedTextField({
+    name: 'Flag Guesses', defVal: String(defaultDifficultyValues!.flagGuesses), validators: [ValidateMinValue(0), ValidateMaxValue(1000)],
     required: true, disabled: difficultyValue != 'custom'
   })
 
-  const [rows, cols, mines, guesses, mineGuesses] = [Number(rowsValue), Number(colsValue), Number(minesValue), Number(guessesValue), Number(mineGuessesValue)];
+  const [rows, cols, mines, guesses, flagGuesses] = [Number(rowsValue), Number(colsValue), Number(minesValue), Number(guessesValue), Number(flagGuessesValue)];
 
   const valid = isFormValid(
-    [difficultyMessage, rowsMessage, colsMessage, minesMessage, guessesMessage, mineGuessesMessage],
+    [difficultyMessage, rowsMessage, colsMessage, minesMessage, guessesMessage, flagGuessesMessage],
     [false, false, false, false, false, false, false]
   );
 
@@ -144,12 +144,13 @@ const BoardControl: FC<ConnectedProps<typeof connector>> = (props) => {
           createInfoTooltip('The number of columns in the game.', colsInput),
           createInfoTooltip('The number of mines in the game.', minesInput),
           createInfoTooltip('The number of guesses allowed per game. When used, if clicking on an unopened cell, the cell will be opened if it does not contain a mine, flagged otherwise.', guessesInput),
-          createInfoTooltip('The number of flag guesses allowed. To use, click on a flagged field. If it was not a mine, you lose. If it was a mine, a number will be displayed up on the flag showing the number of mines around the flagged cell (all 8 of them, excluding the center cell).', mineGuessesInput),]}
+          createInfoTooltip('The number of flag guesses allowed. To use, click on a flagged field. If it was not a mine, you lose. If it was a mine, a number will be displayed up on the flag showing the number of mines around the flagged cell (all 8 of them, excluding the center cell).', flagGuessesInput),]}
           {/* Difficulty (expected and current, if there is difference) */}
           {createInfoTooltip('The mine density of the board, expressed in percentages. This shows the chance of any one field being a mine.', <div className='BoldText'>Mine Density: {valid ? (getMineDensity(rows, cols, mines) * 100).toFixed(2) : '???'}%</div>)}
           {/* <label>{(changed ? 'New Difficulty' : 'Difficluty') + ': ' + String(difficulty)}</label> */}
           {/* Update button */}
-          {createTooltip('Update the board with the current settings.', <Button key='UpdateButton' disabled={!valid} className='Button' onClick={() => props.generateGame({ rows, cols, mines, flagGuesses: mineGuesses, guesses })}>Update</Button>, 'bottom')}
+          {createTooltip('Update the board with the current settings.', <Button key='UpdateButton' disabled={!valid} className='Button'
+            onClick={() => { props.generateGame({ rows, cols, mines, flagGuesses, guesses }) }}>Update</Button>, 'bottom')}
         </div>
       </Collapse>
     </div>

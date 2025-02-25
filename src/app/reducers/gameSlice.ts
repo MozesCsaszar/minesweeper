@@ -169,35 +169,18 @@ export const gameSlice = createSlice({
         },
         generateGame: (state, action: PayloadAction<GameParams>) => {
             const { cols, rows, mines, guesses, flagGuesses } = action.payload;
+
             // set default params
             state.rows = rows;
             state.cols = cols;
             state.mines = mines;
             state.flagGuesses = flagGuesses;
-            // state.currentFlagGuesses = flagGuesses;
             state.guesses = guesses;
-            // state.currentGuesses = guesses;
 
             generateGameHelper(state);
-            // state.opening = undefined;
-            // state.oldOpening = undefined;
-            // state.chording = undefined;
-            // state.oldChording = undefined;
-            // // set flagged, guesses and others
-            // state.mistakes = {};
-            // state.flagGuessed = {};
-            // state.hidden = createBoolean(rows, cols, true);
-            // state.flagged = createBoolean(rows, cols, false);
-            // // set tool usage
-            // state.guessing = false;
-            // // set win state
-            // state.won = false;
-            // state.lost = false;
-            // state.movesMade = 0;
-            // state.cells_unopened = rows * cols;
-            // state.mines_remaining = mines;
-            // // create the new board
-            // state.board = createBoard(rows, cols, mines);
+
+            state.currentFlagGuesses = flagGuesses;
+            state.currentGuesses = guesses;
         },
         openCorners: (state) => {
             batchOpen([[0, 0], [0, state.cols - 1], [state.rows - 1, 0],
@@ -227,5 +210,4 @@ export const gameSlice = createSlice({
 export const { flagField, clickField, chordField,
     generateGame, openCorners, setGuessing, regenerateGame,
     guessField, chordGuessedField, setOpening, setChording, resetOpeningChording } = gameSlice.actions;
-
 export default gameSlice.reducer;

@@ -4,7 +4,7 @@ import React, { FC, useEffect } from 'react';
 import Row from '../Row/Row';
 import styles from './Game.module.css';
 import GameInfo from '../GameInfo/GameInfo';
-import BoardControl from '../BoardControl/BoardControl';
+import BoardControl, { Difficulties } from '../BoardControl/BoardControl';
 import { connect, ConnectedProps } from 'react-redux';
 import { RootState } from '../store';
 import { chordField, flagField, generateGame, clickField, guessField, chordGuessedField, setChording, setOpening, resetOpeningChording, regenerateGame } from '../reducers/gameSlice';
@@ -30,11 +30,8 @@ const Game: FC<ConnectedProps<typeof connector>> = (props) => {
 
   // initialize the game the first time around
   useEffect(() => {
-    props.generateGame({
-      rows: props.game.rows, cols: props.game.cols, mines:
-        props.game.mines, flagGuesses: 0, guesses: 3
-    })
-  }, [props.game.rows, props.game.cols, props.game.mines]);
+    props.generateGame(Difficulties.beginner!)
+  }, []);
 
   const rowElements = [];
 
