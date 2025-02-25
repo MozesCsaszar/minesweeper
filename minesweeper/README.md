@@ -26,7 +26,7 @@ First, clone the git repository:
 git clone https://github.com/MozesCsaszar/minesweeper.git
 ```
 
-Then, install the npm dependencies: 
+Open the minesweeper folder from the cloned repo, then install the npm dependencies: 
 ```bash
 npm install
 # or
@@ -41,4 +41,4 @@ npm run dev
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with a browser to access the website.
+Open [http://localhost:3000/minesweeper](http://localhost:3000/minesweeper) with a browser to access the website.
