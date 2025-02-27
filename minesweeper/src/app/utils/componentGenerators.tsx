@@ -1,6 +1,6 @@
 import { Button, TextField, Link, ToggleButton, ToggleButtonGroup, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import { Dispatch, ReactElement, ReactNode, SetStateAction, useState, MouseEvent, useEffect } from 'react';
-import { TextFieldValidator, ValidateApparence } from './validators';
+import { InputValidator, ValidateApparence } from './validators';
 import { addKeyToFilterSearchParams, getFilterValueFromParams, removeKeyFromFilter, updateSearchParams } from './navigation';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import Tooltip from '@mui/material/Tooltip';
@@ -30,6 +30,27 @@ function createValidatedState(defVal: string): [string, Dispatch<SetStateAction<
     return [...useState(''), ...useState(defVal)]
 }
 
+export type ValidChangeType = ((value: string) => void) | undefined;
+
+/**
+ * Validate a value and set the message
+ * @param value The value to set the input to
+ * @param setMessage The setter for the message of the input
+ * @param validators A list of validators for the input
+ * @returns At return, the message of the will be '' or a validator error
+ */
+function validateInputs(value: string, setMessage: Dispatch<SetStateAction<string>>, validators: InputValidator[]) {
+    for (const v of validators) {
+        const m = v(value);
+        if (m != '') {
+            setMessage(m);
+            return;
+        }
+    }
+
+    setMessage('');
+}
+
 /**
  * Set the value of an input using setValue to value, then validate it
  * @param value The value to set the input to
@@ -40,19 +61,28 @@ function createValidatedState(defVal: string): [string, Dispatch<SetStateAction<
  * @returns At return, the message of the will be '' or a validator error, the value of the input will be value
  */
 function setValueValidate(value: string, setValue: Dispatch<SetStateAction<string>>, setMessage: Dispatch<SetStateAction<string>>,
-    validators: TextFieldValidator[], onValidChange: (value: string) => void = () => { }) {
+    validators: InputValidator[], onValidChange: ValidChangeType = () => { }) {
     setValue(value);
 
+    validateInputs(value, setMessage, validators);
+
+    onValidChange(value);
+}
+
+/**
+ * A function to check whether an input is valid or not based on its value and validators
+ * @param value The current value of the input
+ * @param validators The validators of the input
+ * @returns true if the input is valid, false otherwise
+ */
+export function isInputValid(value: string, validators: InputValidator[]): boolean {
     for (const v of validators) {
         const m = v(value);
         if (m != '') {
-            setMessage(m);
-            return;
+            return false;
         }
     }
-
-    setMessage('');
-    onValidChange(value);
+    return true;
 }
 
 /**
@@ -60,8 +90,22 @@ function setValueValidate(value: string, setValue: Dispatch<SetStateAction<strin
  * @param messages The messages of the inputs from a form
  * @returns True if there are no errors, false otherwise
  */
-export function isFormValid(messages: string[], hidden: boolean[]): boolean {
-    return messages.every((value, i) => hidden[i] || value == '');
+export function isFormValid(inputs: InputsDataType): boolean {
+    return inputs.values.every((value, i) => inputs.hidden[i] || isInputValid(value, inputs.validatorList[i]));
+}
+
+
+export function setFormValuesValidate(values: string[], inputs: InputsDataType) {
+    for (const i in inputs.inputs) {
+        setValueValidate(values[i], inputs.setValues[i], inputs.setMessages[i], inputs.validatorList[i], inputs.onValidChanges[i])
+    }
+}
+
+export function setFormValuesNoValidate(values: string[], inputs: InputsDataType) {
+    for (const i in inputs.inputs) {
+        inputs.setValues[i](values[i]);
+        inputs.setMessages[i]('');
+    }
 }
 
 /**
@@ -114,13 +158,20 @@ function replaceOptionalInputFieldProps<T extends InputFieldCreationProps>(props
 /**
  * A type that collects all of the information from a created input
  */
-type InputFieldData = [ReactElement, string, string, Dispatch<SetStateAction<string>>];
+type InputFieldData = {
+    input: ReactElement,
+    value: string,
+    setValue: Dispatch<SetStateAction<string>>,
+    message: string,
+    setMessage: Dispatch<SetStateAction<string>>,
+    validators: InputValidator[]
+};
 
 /**
  * Creates and returns the components of a MUI TextField that is validated by a set of validators
  * @param name The label (and also the key) of the TextField
  * @param defVal The default value of the TextField
- * @param validators A list of TextFieldValidators that the value must be validated against; the field is only considered valid if it passes all validators
+ * @param validators A list of InputValidators that the value must be validated against; the field is only considered valid if it passes all validators
  * @param onValidChange A function to call when a valid change is detected
  * @returns A list containing three elements: the TextField ReactElement, the value of the validator message and the value of the TextField
  */
@@ -129,13 +180,19 @@ export function createValidatedTextField(props: InputFieldCreationProps): InputF
 
     const [message, setMessage, value, setValue] = createValidatedState(defVal);
 
-    return [<>
-        <InputLabel sx={{ display: hidden ? 'none' : null }}>{name}</InputLabel>
-        <TextField key={name} disabled={disabled} onChange={
-            (e) => setValueValidate(e.target.value, setValue, setMessage, validators, onValidChange)
-        } error={message != ''} required={required} value={value} sx={{ display: hidden ? 'none' : null }} helperText={message} variant='standard'></TextField>
-    </>
-        , message, value, setValue]
+    return {
+        input: <>
+            <InputLabel sx={{ display: hidden ? 'none' : null }}>{name}</InputLabel>
+            <TextField key={name} disabled={disabled} onChange={
+                (e) => setValueValidate(e.target.value, setValue, setMessage, validators, onValidChange)
+            } error={message != ''} required={required} value={value} sx={{ display: hidden ? 'none' : null }} helperText={message} variant='standard'></TextField>
+        </>,
+        value,
+        setValue,
+        message,
+        setMessage,
+        validators
+    }
 }
 
 /**
@@ -201,13 +258,20 @@ export function createToggleButtonGroup(props: ToggleButtonGroupCreationProps): 
 
 
     // TODO: Change label element here
-    return [<>
-        <InputLabel key={`${name}-label`}>{name}</InputLabel>
-        <ToggleButtonGroup disabled={disabled} key={name} sx={{ flexWrap: "wrap", display: hidden ? 'none' : null }}
-            value={value} exclusive onChange={onChange} aria-label={name}>
-            {createToggleButtons(values, Array.isArray(names) ? names : values.map(names))}
-        </ToggleButtonGroup>
-    </>, message, value, setValue]
+    return {
+        input: <>
+            <InputLabel key={`${name}-label`}>{name}</InputLabel>
+            <ToggleButtonGroup disabled={disabled} key={name} sx={{ flexWrap: "wrap", display: hidden ? 'none' : null }}
+                value={value} exclusive onChange={onChange} aria-label={name}>
+                {createToggleButtons(values, Array.isArray(names) ? names : values.map(names))}
+            </ToggleButtonGroup>
+        </>,
+        value,
+        setValue,
+        message,
+        setMessage,
+        validators: [ValidateApparence(values, !required)]
+    }
 }
 
 
@@ -227,13 +291,20 @@ export function createSelect(props: ToggleButtonGroupCreationProps): InputFieldD
 
     const [message, setMessage, value, setValue] = createValidatedState(defVal);
 
-    return [<>
-        <InputLabel sx={{ display: hidden ? 'none' : null }} id={`${name}-select-label`}>{name}</InputLabel>
-        <Select value={value} onChange={onChange} disabled={disabled} variant='standard'
-            sx={{ display: hidden ? 'none' : null }}>
-            {generateMenuItems()}
-        </Select>
-    </>, message, value, setValue]
+    return {
+        input: <>
+            <InputLabel sx={{ display: hidden ? 'none' : null }} id={`${name}-select-label`}>{name}</InputLabel>
+            <Select value={value} onChange={onChange} disabled={disabled} variant='standard'
+                sx={{ display: hidden ? 'none' : null }}>
+                {generateMenuItems()}
+            </Select>
+        </>,
+        value,
+        setValue,
+        message,
+        setMessage,
+        validators: [ValidateApparence(values, !required)]
+    }
 }
 
 export interface InputMetadata {
@@ -241,7 +312,7 @@ export interface InputMetadata {
     create: { props: InputFieldCreationProps, type: 'text-field' } |
     { props: ToggleButtonGroupCreationProps, type: 'toggle-button-group' } |
     { props: ToggleButtonGroupCreationProps, type: 'select' } |
-    { props: { hidden?: boolean, defVal: string, data: InputFieldData }, type: 'initialized' }
+    { props: { hidden?: boolean, onValidChange?: (value: string) => void, defVal: string, data: InputFieldData }, type: 'initialized' }
 }
 
 // TODO: better handle values that are shared between creation and created props
@@ -276,135 +347,150 @@ function createInput(inputMetadata: InputMetadata): InputFieldData {
     }
 }
 
-function createInputs(inputsMetadata: InputMetadata[]): [ReactElement[], string[], string[], Dispatch<SetStateAction<string>>[], boolean[]] {
-    const [inputs, messages, values, setValues, hidden]: [ReactElement[], string[], string[], Dispatch<SetStateAction<string>>[], boolean[]] = [[], [], [], [], []];
+type InputsDataType = {
+    inputs: ReactElement[],
+    values: string[],
+    setValues: Dispatch<SetStateAction<string>>[],
+    messages: string[],
+    setMessages: Dispatch<SetStateAction<string>>[],
+    hidden: boolean[],
+    validatorList: InputValidator[][],
+    onValidChanges: ValidChangeType[]
+}
 
-    for (const inputMetadata of inputsMetadata) {
-        const [input, message, value, setValue] = createInput(inputMetadata);
-
-        inputs.push(input); messages.push(message);
-        values.push(value); setValues.push(setValue);
-        hidden.push(inputMetadata.create.props.hidden ?? false);
+function createInputs(inputsMetadata: InputMetadata[]): InputsDataType {
+    const inputsData: InputsDataType = {
+        inputs: [], values: [], setValues: [], messages: [], setMessages: [], hidden: [], validatorList: [], onValidChanges: []
     }
 
-    return [inputs, messages, values, setValues, hidden];
+    for (const inputMetadata of inputsMetadata) {
+        const { input, message, setMessage, value, setValue, validators } = createInput(inputMetadata);
+
+        inputsData.inputs.push(input); inputsData.messages.push(message);
+        inputsData.values.push(value); inputsData.setValues.push(setValue);
+        inputsData.hidden.push(inputMetadata.create.props.hidden ?? false);
+        inputsData.validatorList.push(validators); inputsData.setMessages.push(setMessage);
+        inputsData.onValidChanges.push(inputMetadata.create.props.onValidChange);
+    }
+
+    return inputsData;
 }
 
 // TODO: maybe change this data representation
 // input elements, button elements, values list
-type FormData = [ReactElement[], ReactElement[], string[]];
+type FormData = { inputs: InputsDataType, submitButton: ReactElement };
 // TODO: Validate that every key is unique; change inner data representation to a single dict
-/**
- * Generate a filter form that puts all of the input values into the URL as query params
- * @param searchButtonText The text of the seach button
- * @param inputsMetadata The metadata to create the inputs for the form
- * @param searchParams The current search params of the URL
- * @param router The router
- * @param pathname The current path's name
- * @param clearButton If true, a clear button is generated with the search one
- * @param onValidSubmit Extra function to run when the form is submitted with valid input data
- * @returns The inputs, control buttons and current values of the inputs
- */
-export function createURLFilterForm(searchButtonText: string, inputsMetadata: URLInputMetadata[], searchParams: URLSearchParams,
-    router: AppRouterInstance, pathname: string, clearButton: boolean = false, onValidSubmit: () => void = () => { }): FormData {
-    // add refreshing the page with params from form
-    function addParamsToURL() {
-        // udpate searchParams
-        for (let i = 0; i < inputsMetadata.length; i++) {
-            const inputMetadata = inputsMetadata[i];
-            // only add it if the input is not hidden
-            if (!inputMetadata.create.props.hidden) {
-                // if the value is in the filter URL keyword
-                if (inputMetadata.filterMethod != '') {
-                    if (values[i] != '') {
-                        searchParams = addKeyToFilterSearchParams(searchParams, inputMetadata.key, inputMetadata.filterMethod, values[i]);
-                    }
-                    else {
-                        searchParams = removeKeyFromFilter(searchParams, inputMetadata.key);
-                    }
-                }
-                else {
-                    searchParams = updateSearchParams(searchParams, inputMetadata.key, values[i]);
-                }
-            }
-            // remove potential hidden values from searchParams
-            else {
-                if (inputMetadata.filterMethod != '') {
-                    searchParams = removeKeyFromFilter(searchParams, inputMetadata.key);
-                }
-                else {
-                    searchParams = updateSearchParams(searchParams, inputMetadata.key, '');
-                }
-            }
-        }
-        // update route
-        router.push(`${pathname}?${searchParams.toString()}`)
-    }
+// /**
+//  * Generate a filter form that puts all of the input values into the URL as query params
+//  * @param searchButtonText The text of the seach button
+//  * @param inputsMetadata The metadata to create the inputs for the form
+//  * @param searchParams The current search params of the URL
+//  * @param router The router
+//  * @param pathname The current path's name
+//  * @param clearButton If true, a clear button is generated with the search one
+//  * @param onValidSubmit Extra function to run when the form is submitted with valid input data
+//  * @returns The inputs, control buttons and current values of the inputs
+//  */
+// export function createURLFilterForm(searchButtonText: string, inputsMetadata: URLInputMetadata[], searchParams: URLSearchParams,
+//     router: AppRouterInstance, pathname: string, clearButton: boolean = false, onValidSubmit: () => void = () => { }): FormData {
+//     // add refreshing the page with params from form
+//     function addParamsToURL() {
+//         // udpate searchParams
+//         for (let i = 0; i < inputsMetadata.length; i++) {
+//             const inputMetadata = inputsMetadata[i];
+//             // only add it if the input is not hidden
+//             if (!inputMetadata.create.props.hidden) {
+//                 // if the value is in the filter URL keyword
+//                 if (inputMetadata.filterMethod != '') {
+//                     if (values[i] != '') {
+//                         searchParams = addKeyToFilterSearchParams(searchParams, inputMetadata.key, inputMetadata.filterMethod, values[i]);
+//                     }
+//                     else {
+//                         searchParams = removeKeyFromFilter(searchParams, inputMetadata.key);
+//                     }
+//                 }
+//                 else {
+//                     searchParams = updateSearchParams(searchParams, inputMetadata.key, values[i]);
+//                 }
+//             }
+//             // remove potential hidden values from searchParams
+//             else {
+//                 if (inputMetadata.filterMethod != '') {
+//                     searchParams = removeKeyFromFilter(searchParams, inputMetadata.key);
+//                 }
+//                 else {
+//                     searchParams = updateSearchParams(searchParams, inputMetadata.key, '');
+//                 }
+//             }
+//         }
+//         // update route
+//         router.push(`${pathname}?${searchParams.toString()}`)
+//     }
 
-    // add refreshing params with params from URL
-    function onRefresh() {
-        // extract and update values of the inputs
-        for (let i = 0; i < inputsMetadata.length; i++) {
-            const inputMetadata = inputsMetadata[i];
-            // only update value if the input is not hidden
-            if (!inputMetadata.create.props.hidden) {
-                let value: string;
-                // if the value is in the filter URL keyword
-                if (inputMetadata.filterMethod != '') {
-                    value = getFilterValueFromParams(searchParams, inputMetadata.key);
-                }
-                else {
-                    value = searchParams.get(inputMetadata.key) ?? inputMetadata.create.props.defVal ?? '';
-                }
-                if (value != values[i]) {
-                    setValues[i](value);
-                }
-            }
-        }
-    }
-    // clear form
-    function onClear() {
-        // extract all of the values and update the URLs
-        for (let i = 0; i < inputsMetadata.length; i++) {
-            const inputMetadata = inputsMetadata[i];
-            const defVal = inputMetadata.create.props.defVal || '';
-            // if the value is in the filter URL keyword
-            if (inputMetadata.filterMethod != '') {
-                if (defVal != '') {
-                    searchParams = addKeyToFilterSearchParams(searchParams, inputMetadata.key, inputMetadata.filterMethod, defVal);
-                }
-                else {
-                    searchParams = removeKeyFromFilter(searchParams, inputMetadata.key);
-                }
-            }
-            else {
-                searchParams = updateSearchParams(searchParams, inputMetadata.key, defVal);
-            }
-        }
-        // update route
-        router.push(`${pathname}?${searchParams.toString()}`)
-    }
-    // on submit
-    function onSubmit() {
-        if (valid) {
-            addParamsToURL();
-            onValidSubmit();
-        }
-    }
+//     // add refreshing params with params from URL
+//     function onRefresh() {
+//         // extract and update values of the inputs
+//         for (let i = 0; i < inputsMetadata.length; i++) {
+//             const inputMetadata = inputsMetadata[i];
+//             // only update value if the input is not hidden
+//             if (!inputMetadata.create.props.hidden) {
+//                 let value: string;
+//                 // if the value is in the filter URL keyword
+//                 if (inputMetadata.filterMethod != '') {
+//                     value = getFilterValueFromParams(searchParams, inputMetadata.key);
+//                 }
+//                 else {
+//                     value = searchParams.get(inputMetadata.key) ?? inputMetadata.create.props.defVal ?? '';
+//                 }
+//                 if (value != values[i]) {
+//                     setValues[i](value);
+//                 }
+//             }
+//         }
+//     }
+//     // clear form
+//     function onClear() {
+//         // extract all of the values and update the URLs
+//         for (let i = 0; i < inputsMetadata.length; i++) {
+//             const inputMetadata = inputsMetadata[i];
+//             const defVal = inputMetadata.create.props.defVal || '';
+//             // if the value is in the filter URL keyword
+//             if (inputMetadata.filterMethod != '') {
+//                 if (defVal != '') {
+//                     searchParams = addKeyToFilterSearchParams(searchParams, inputMetadata.key, inputMetadata.filterMethod, defVal);
+//                 }
+//                 else {
+//                     searchParams = removeKeyFromFilter(searchParams, inputMetadata.key);
+//                 }
+//             }
+//             else {
+//                 searchParams = updateSearchParams(searchParams, inputMetadata.key, defVal);
+//             }
+//         }
+//         // update route
+//         router.push(`${pathname}?${searchParams.toString()}`)
+//     }
+//     // on submit
+//     function onSubmit() {
+//         if (valid) {
+//             addParamsToURL();
+//             onValidSubmit();
+//         }
+//     }
 
-    // create the inputs
-    const [inputs, messages, values, setValues, hidden] = createInputs(inputsMetadata);
+//     // create the inputs
+//     const [inputs, messages, values, setValues, hidden] = createInputs(inputsMetadata);
 
-    const valid = isFormValid(messages, hidden);
-    const buttons = [<Button key='Submit' disabled={!valid} onClick={valid ? onSubmit : undefined}>{searchButtonText}</Button>];
-    if (clearButton) {
-        buttons.unshift(<Button key='Clear' onClick={onClear}>Clear</Button>);
-    }
+//     const valid = isFormValid(messages, hidden);
+//     const buttons = [<Button key='Submit' disabled={!valid} onClick={valid ? onSubmit : undefined}>{searchButtonText}</Button>];
+//     if (clearButton) {
+//         buttons.unshift(<Button key='Clear' onClick={onClear}>Clear</Button>);
+//     }
 
-    useEffect(() => onRefresh, [searchParams, onRefresh]);
-    // create the button
-    return [inputs, buttons, values]
-}
+//     useEffect(() => onRefresh, [searchParams, onRefresh]);
+//     // create the button
+//     return [inputs, buttons, values]
+// }
 
 
 /**
@@ -415,13 +501,22 @@ export function createURLFilterForm(searchButtonText: string, inputsMetadata: UR
  * @param onSubmit A function that takes the messages and current values of the form and does something when the button is clicked
  * @returns A list of elements, where the first one is the form created, elements enclosed in a fragment, the second is the messages of the TextFields and the third is the values of the TextFields
  */
-export function createForm(searchButtonText: string, inputsMetadata: InputMetadata[], onSubmit?: (values: string[]) => void): FormData {
-    // create the inputs
-    const [inputs, messages, values, , hidden] = createInputs(inputsMetadata);
+export function createForm(searchButtonText: string, inputsMetadata: InputMetadata[], submitButtonClass: string = '', onSubmit: (values: string[]) => void = () => { }): FormData {
+    function submit() {
+        if (valid) {
+            onSubmit(inputs.values);
+        }
+        else {
+            setFormValuesValidate(inputs.values, inputs);
+        }
+    }
 
-    const valid = isFormValid(messages, hidden);
-    const buttons = [<Button key='Submit' disabled={!valid} onClick={valid && onSubmit ? () => { onSubmit(values) } : undefined}>{searchButtonText}</Button>];
-    return [inputs, buttons, values]
+    // create the inputs
+    const inputs = createInputs(inputsMetadata);
+
+    const valid = isFormValid(inputs);
+    const submitButton = <Button className={`${submitButtonClass}`} key='Submit' disabled={!valid} onClick={submit}>{searchButtonText}</Button>;
+    return { inputs, submitButton };
 }
 
 export function createLink(text: ReactNode, href: string, className: string = '', targetBlank: boolean = true) {
@@ -442,7 +537,7 @@ export function createLargeTitle(text: ReactNode, className: string = '') {
 }
 
 // TODO: Debounce this
-// export function createValidatedURLInput(label: string, defVal: string, validators: TextFieldValidator[],
+// export function createValidatedURLInput(label: string, defVal: string, validators: InputValidator[],
 //     key: string, params: URLSearchParams, router: AppRouterInstance, pathname: string, filterMethod: string = ''): [ReactElement, string, string, Dispatch<SetStateAction<string>>] {
 //     function updateURLParams(value: string) {
 //         if (filterMethod != '') {

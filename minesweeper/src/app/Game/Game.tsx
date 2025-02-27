@@ -31,7 +31,7 @@ const Game: FC<ConnectedProps<typeof connector>> = (props) => {
   // initialize the game the first time around
   useEffect(() => {
     props.generateGame(Difficulties.beginner!)
-  }, []);
+  }, [props.generateGame]);
 
   const rowElements = [];
 
@@ -56,9 +56,9 @@ const Game: FC<ConnectedProps<typeof connector>> = (props) => {
         {<BoardControl />}
       </div>
       {/* Board */}
-      <div className='flex flex-col relative left-[228px]'>
+      <div className='flex flex-col relative left-[229px] pr-4'>
         {<GameInfo />}
-        <div className={styles.Rows}>
+        <div className={`${styles.Rows} pb-4`}>
           {rowElements}
         </div>
       </div>

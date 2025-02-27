@@ -3,7 +3,7 @@ import { generateGame } from '../reducers/gameSlice';
 import { RootState } from '../store';
 import { connect, ConnectedProps } from 'react-redux';
 import { getMineDensity } from '../utils/boardUtils';
-import { createInfoTooltip, createSelect, createTooltip, createValidatedTextField, isFormValid } from '../utils/componentGenerators';
+import { createForm, createInfoTooltip, createSelect, createTooltip, createValidatedTextField, InputMetadata, setFormValuesNoValidate } from '../utils/componentGenerators';
 import { ValidateMaxValue, ValidateMinValue } from '../utils/validators';
 import { Button, Collapse } from '@mui/material';
 
@@ -79,11 +79,7 @@ const BoardControl: FC<ConnectedProps<typeof connector>> = (props) => {
     if (value != 'custom') {
       const d = Difficulties[value];
       if (d != undefined) {
-        rowsSetValue(String(d.rows));
-        colsSetValue(String(d.cols));
-        minesSetValue(String(d.mines));
-        guessesSetValue(String(d.guesses));
-        flagGuessesSetValue(String(d.flagGuesses));
+        setFormValuesNoValidate([value, String(d.rows), String(d.cols), String(d.mines), String(d.guesses), String(d.flagGuesses)], form.inputs);
       }
     }
   }
@@ -91,42 +87,87 @@ const BoardControl: FC<ConnectedProps<typeof connector>> = (props) => {
   const [expanded, setExpanded] = useState(true);
 
   // create the difficulty select
-  const [difficultyInput, difficultyMessage, difficultyValue] = createSelect({
+  const difficultyInput = createSelect({
     name: 'Difficulty', defVal: defaultDifficulty, required: true,
     values: Object.keys(Difficulties), names: (v) => v[0].toUpperCase() + v.slice(1),
     onValidChange: changeDifficulty
   });
 
+  const inputsEnabled = difficultyInput.value != 'custom';
+
   // create board selects
-  const [rowsInput, rowsMessage, rowsValue, rowsSetValue] = createValidatedTextField({
+  const rowsInput = createValidatedTextField({
     name: 'Rows', defVal: String(defaultDifficultyValues!.rows), validators: [ValidateMinValue(5), ValidateMaxValue(100)],
-    required: true, disabled: difficultyValue != 'custom',
+    required: true, disabled: inputsEnabled,
   })
-  const [colsInput, colsMessage, colsValue, colsSetValue] = createValidatedTextField({
+  const colsInput = createValidatedTextField({
     name: 'Cols', defVal: String(defaultDifficultyValues!.cols), validators: [ValidateMinValue(5), ValidateMaxValue(100)],
-    required: true, disabled: difficultyValue != 'custom',
-  })
-  const rowsColsValid = rowsMessage == '' && colsMessage == '';
-  const area = rowsColsValid ? Number(rowsValue) * Number(colsValue) : 0;
-  const [minesInput, minesMessage, minesValue, minesSetValue] = createValidatedTextField({
-    name: 'Mines', defVal: String(defaultDifficultyValues!.mines), validators: rowsColsValid ? [ValidateMinValue(Math.floor(area / 7)), ValidateMaxValue(Math.ceil(area / 3))] : [],
-    required: true, disabled: difficultyValue != 'custom'
-  })
-  const [guessesInput, guessesMessage, guessesValue, guessesSetValue] = createValidatedTextField({
-    name: 'Guesses', defVal: String(defaultDifficultyValues!.guesses), validators: [ValidateMinValue(0), ValidateMaxValue(1000)],
-    required: true, disabled: difficultyValue != 'custom'
-  })
-  const [flagGuessesInput, flagGuessesMessage, flagGuessesValue, flagGuessesSetValue] = createValidatedTextField({
-    name: 'Flag Guesses', defVal: String(defaultDifficultyValues!.flagGuesses), validators: [ValidateMinValue(0), ValidateMaxValue(1000)],
-    required: true, disabled: difficultyValue != 'custom'
+    required: true, disabled: inputsEnabled,
   })
 
-  const [rows, cols, mines, guesses, flagGuesses] = [Number(rowsValue), Number(colsValue), Number(minesValue), Number(guessesValue), Number(flagGuessesValue)];
+  const rowsColsValid = rowsInput.message == '' && colsInput.message == '';
+  const area = rowsColsValid ? Number(rowsInput.value) * Number(colsInput.value) : 0;
 
-  const valid = isFormValid(
-    [difficultyMessage, rowsMessage, colsMessage, minesMessage, guessesMessage, flagGuessesMessage],
-    [false, false, false, false, false, false, false]
-  );
+  const formMetadata: InputMetadata[] = [
+    {
+      key: 'Difficulty', create: {
+        type: 'initialized',
+        props: {
+          defVal: defaultDifficulty,
+          data: difficultyInput
+        }
+      }
+    },
+    {
+      key: 'Rows', create: {
+        type: 'initialized',
+        props: {
+          defVal: String(defaultDifficultyValues!.rows),
+          data: rowsInput
+        }
+      }
+    },
+    {
+      key: 'Cols', create: {
+        type: 'initialized',
+        props: {
+          defVal: String(defaultDifficultyValues!.cols),
+          data: colsInput
+        }
+      }
+    },
+    {
+      key: 'Mines', create: {
+        type: 'text-field',
+        props: {
+          name: 'Mines', defVal: String(defaultDifficultyValues!.mines), required: true, disabled: inputsEnabled,
+          validators: rowsColsValid ? [ValidateMinValue(Math.floor(area / 7)), ValidateMaxValue(Math.ceil(area / 3))] : [],
+        }
+      }
+    },
+    {
+      key: 'Guesses', create: {
+        type: 'text-field',
+        props: {
+          name: 'Guesses', defVal: String(defaultDifficultyValues!.guesses), validators: [ValidateMinValue(0), ValidateMaxValue(1000)],
+          required: true, disabled: inputsEnabled
+        }
+      }
+    },
+    {
+      key: 'Flag Guesses', create: {
+        type: 'text-field',
+        props: {
+          name: 'Flag Guesses', defVal: String(defaultDifficultyValues!.flagGuesses), validators: [ValidateMinValue(0), ValidateMaxValue(1000)],
+          required: true, disabled: inputsEnabled
+        }
+      }
+    }
+  ];
+  const form = createForm('Update', formMetadata, 'Button', () => { props.generateGame({ rows, cols, mines, flagGuesses, guesses }) });
+
+  const [rows, cols, mines, guesses, flagGuesses] = [Number(rowsInput.value), Number(colsInput.value), Number(form.inputs.values[3]), Number(form.inputs.values[4]), Number(form.inputs.values[5])];
+  const validMines = area / 7 <= mines && mines <= area / 3;
 
   return (
     <div className='flex flex-col'>
@@ -139,18 +180,17 @@ const BoardControl: FC<ConnectedProps<typeof connector>> = (props) => {
       <Collapse in={expanded}>
         <div className='flex flex-col'>
           {/* Inputs for minefield statistics */}
-          {[createInfoTooltip('The difficulty of the game, which will determine the number of rows, columns, mines, guesses and flag guesses. Custom mode allows for setting these values arbitrarily.', difficultyInput),
-          createInfoTooltip('The number of rows in the game.', rowsInput),
-          createInfoTooltip('The number of columns in the game.', colsInput),
-          createInfoTooltip('The number of mines in the game.', minesInput),
-          createInfoTooltip('The number of guesses allowed per game. When used, if clicking on an unopened cell, the cell will be opened if it does not contain a mine, flagged otherwise.', guessesInput),
-          createInfoTooltip('The number of flag guesses allowed. To use, click on a flagged field. If it was not a mine, you lose. If it was a mine, a number will be displayed up on the flag showing the number of mines around the flagged cell (all 8 of them, excluding the center cell).', flagGuessesInput),]}
+          {[createInfoTooltip('The difficulty of the game, which will determine the number of rows, columns, mines, guesses and flag guesses. Custom mode allows for setting these values arbitrarily.', form.inputs.inputs[0]),
+          createInfoTooltip('The number of rows in the game.', form.inputs.inputs[1]),
+          createInfoTooltip('The number of columns in the game.', form.inputs.inputs[2]),
+          createInfoTooltip('The number of mines in the game.', form.inputs.inputs[3]),
+          createInfoTooltip('The number of guesses allowed per game. When used, if clicking on an unopened cell, the cell will be opened if it does not contain a mine, flagged otherwise.', form.inputs.inputs[4]),
+          createInfoTooltip('The number of flag guesses allowed. To use, click on a flagged field. If it was not a mine, you lose. If it was a mine, a number will be displayed up on the flag showing the number of mines around the flagged cell (all 8 of them, excluding the center cell).', form.inputs.inputs[5]),]}
           {/* Difficulty (expected and current, if there is difference) */}
-          {createInfoTooltip('The mine density of the board, expressed in percentages. This shows the chance of any one field being a mine.', <div className='BoldText'>Mine Density: {valid ? (getMineDensity(rows, cols, mines) * 100).toFixed(2) : '???'}%</div>)}
+          {createInfoTooltip('The mine density of the board, expressed in percentages. This shows the chance of any one field being a mine.', <div className='BoldText'>Mine Density: {validMines ? (getMineDensity(rows, cols, mines) * 100).toFixed(2) : '???'}%</div>)}
           {/* <label>{(changed ? 'New Difficulty' : 'Difficluty') + ': ' + String(difficulty)}</label> */}
           {/* Update button */}
-          {createTooltip('Update the board with the current settings.', <Button key='UpdateButton' disabled={!valid} className='Button'
-            onClick={() => { props.generateGame({ rows, cols, mines, flagGuesses, guesses }) }}>Update</Button>, 'bottom')}
+          {createTooltip('Update the board with the current settings.', form.submitButton)}
         </div>
       </Collapse>
     </div>

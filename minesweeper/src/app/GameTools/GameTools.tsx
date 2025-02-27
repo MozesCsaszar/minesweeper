@@ -28,7 +28,6 @@ const GameTools: FC<ConnectedProps<typeof connector>> = (props) => {
       <input readOnly={value == 0} checked={selected} className='ml-auto mt-4 mr-1 h-5 basis-6' type='checkbox' onChange={value != 0 ? onClick : undefined}></input>
       <input disabled type='text' inputMode='numeric' name={label} value={value}></input>
     </div>
-
   }
 
   return (
